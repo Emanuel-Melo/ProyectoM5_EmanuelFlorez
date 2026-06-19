@@ -1,9 +1,7 @@
+import AppRouter from "./app/router/AppRouter";
+
 function App() {
-  return (
-    <div>
-      <h1>Ecommerce AI Driven</h1>
-    </div>
-  );
+  return <AppRouter />;
 }
 
 export default App;
