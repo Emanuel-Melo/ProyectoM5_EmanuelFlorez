@@ -1,8 +1,6 @@
-export type UserRole = "admin" | "customer";
+import type { User } from "firebase/auth";
 
-export interface UserProfile {
-  uid: string;
-  email: string;
-  displayName: string;
-  role: UserRole;
+export interface AuthContextType {
+  user: User | null;
+  loading: boolean;
 }
