@@ -1,20 +1,15 @@
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 
 import { auth } from "../../../shared/services/firebase/auth";
-import type { AuthContextType } from "../types/auth.types";
+import { AuthContext } from "./authContextValue";
 
 interface Props {
   children: ReactNode;
 }
-
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-});
 
 export function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<User | null>(null);

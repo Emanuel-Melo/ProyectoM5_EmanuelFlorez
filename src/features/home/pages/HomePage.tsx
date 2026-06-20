@@ -9,7 +9,7 @@ function HomePage() {
 
       <p>Loading: {String(loading)}</p>
 
-      <p>User: {user?.email}</p>
+      <p>User: {user?.email ?? "null"}</p>
     </div>
   );
 }
