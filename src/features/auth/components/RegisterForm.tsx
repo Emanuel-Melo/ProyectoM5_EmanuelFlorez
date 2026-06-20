@@ -21,8 +21,8 @@ export const RegisterForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form className="form-stack" onSubmit={handleSubmit}>
+      <div className="field">
         <label htmlFor="register-email">Correo</label>
         <input
           id="register-email"
@@ -35,7 +35,7 @@ export const RegisterForm = ({
         />
       </div>
 
-      <div>
+      <div className="field">
         <label htmlFor="register-password">Contrasena</label>
         <input
           id="register-password"
@@ -49,9 +49,13 @@ export const RegisterForm = ({
         />
       </div>
 
-      {errorMessage && <p role="alert">{errorMessage}</p>}
+      {errorMessage && (
+        <p className="error-message" role="alert">
+          {errorMessage}
+        </p>
+      )}
 
-      <button type="submit" disabled={loading}>
+      <button className="button" type="submit" disabled={loading}>
         {loading ? "Creando cuenta..." : "Crear cuenta"}
       </button>
     </form>

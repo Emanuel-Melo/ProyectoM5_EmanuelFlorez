@@ -1,16 +1,40 @@
+import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../../auth/hooks/useAuth";
+import { authService } from "../../auth/services/authService";
 
 function HomePage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await authService.logout();
+    navigate("/", { replace: true });
+  };
 
   return (
-    <div>
-      <h1>Home</h1>
+    <main className="app-shell">
+      <section className="home-layout home-panel">
+        <p className="eyebrow">Sesion activa</p>
+        <h1>Home</h1>
 
-      <p>Loading: {String(loading)}</p>
+        <p>
+          Ya estas autenticado. Desde aqui puedes empezar a construir las vistas
+          privadas de tu ecommerce.
+        </p>
 
-      <p>User: {user?.email ?? "null"}</p>
-    </div>
+        <div className="session-card">
+          <strong>Usuario conectado</strong>
+          <p>{user?.email ?? "Usuario sin correo disponible"}</p>
+        </div>
+
+        <div className="home-actions">
+          <button className="button button-danger" type="button" onClick={handleLogout}>
+            Cerrar sesion
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
 

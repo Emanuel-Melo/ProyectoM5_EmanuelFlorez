@@ -23,8 +23,8 @@ export const LoginForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form className="form-stack" onSubmit={handleSubmit}>
+      <div className="field">
         <label htmlFor="email">Correo</label>
         <input
           id="email"
@@ -37,7 +37,7 @@ export const LoginForm = ({
         />
       </div>
 
-      <div>
+      <div className="field">
         <label htmlFor="password">Contrasena</label>
         <input
           id="password"
@@ -50,13 +50,22 @@ export const LoginForm = ({
         />
       </div>
 
-      {errorMessage && <p role="alert">{errorMessage}</p>}
+      {errorMessage && (
+        <p className="error-message" role="alert">
+          {errorMessage}
+        </p>
+      )}
 
-      <button type="submit" disabled={loading}>
+      <button className="button" type="submit" disabled={loading}>
         {loading ? "Ingresando..." : "Ingresar"}
       </button>
 
-      <button type="button" onClick={onGoogleLogin} disabled={loading}>
+      <button
+        className="button button-secondary"
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={loading}
+      >
         Entrar con Google
       </button>
     </form>

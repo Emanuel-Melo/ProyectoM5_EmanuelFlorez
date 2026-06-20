@@ -43,20 +43,32 @@ function LoginPage() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <main className="app-shell">
+      <section className="auth-card">
+        <p className="eyebrow">Acceso</p>
+        <h1>Iniciar sesion</h1>
+        <p>Entra con tu usuario de Firebase para continuar al home privado.</p>
 
-      <LoginForm
-        errorMessage={errorMessage}
-        loading={loading}
-        onSubmit={handleLogin}
-        onGoogleLogin={handleGoogleLogin}
-      />
+        <LoginForm
+          errorMessage={errorMessage}
+          loading={loading}
+          onSubmit={handleLogin}
+          onGoogleLogin={handleGoogleLogin}
+        />
 
-      <p>
-        No tienes cuenta? <Link to="/register">Registrate</Link>
-      </p>
-    </div>
+        <p>
+          No tienes cuenta?{" "}
+          <Link className="text-link" to="/register">
+            Registrate
+          </Link>
+        </p>
+        <p>
+          <Link className="text-link" to="/">
+            Volver al inicio
+          </Link>
+        </p>
+      </section>
+    </main>
   );
 }
 

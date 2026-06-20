@@ -27,19 +27,31 @@ function RegisterPage() {
   };
 
   return (
-    <div>
-      <h1>Registro</h1>
+    <main className="app-shell">
+      <section className="auth-card">
+        <p className="eyebrow">Nueva cuenta</p>
+        <h1>Registro</h1>
+        <p>Crea un usuario con correo y contrasena para entrar al home.</p>
 
-      <RegisterForm
-        errorMessage={errorMessage}
-        loading={loading}
-        onSubmit={handleRegister}
-      />
+        <RegisterForm
+          errorMessage={errorMessage}
+          loading={loading}
+          onSubmit={handleRegister}
+        />
 
-      <p>
-        Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
-      </p>
-    </div>
+        <p>
+          Ya tienes cuenta?{" "}
+          <Link className="text-link" to="/login">
+            Inicia sesion
+          </Link>
+        </p>
+        <p>
+          <Link className="text-link" to="/">
+            Volver al inicio
+          </Link>
+        </p>
+      </section>
+    </main>
   );
 }
 
