@@ -1,29 +1,44 @@
 import { useState } from "react";
-import { authService } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { LoginForm } from "../components/LoginForm";
+import { authService, getAuthErrorMessage } from "../services/authService";
 
 function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (email: string, password: string) => {
     try {
       setErrorMessage("");
+      setLoading(true);
 
-      await authService.login(
-        "test@test.com",
-        "123456"
-      );
+      await authService.login(email, password);
 
       navigate("/home", { replace: true });
     } catch (error) {
       console.error(error);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No se pudo iniciar sesion"
-      );
+      setErrorMessage(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setErrorMessage("");
+      setLoading(true);
+
+      await authService.loginWithGoogle();
+
+      navigate("/home", { replace: true });
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,11 +46,16 @@ function LoginPage() {
     <div>
       <h1>Login</h1>
 
-      <button onClick={handleLogin}>
-        Login Test
-      </button>
+      <LoginForm
+        errorMessage={errorMessage}
+        loading={loading}
+        onSubmit={handleLogin}
+        onGoogleLogin={handleGoogleLogin}
+      />
 
-      {errorMessage && <p>{errorMessage}</p>}
+      <p>
+        No tienes cuenta? <Link to="/register">Registrate</Link>
+      </p>
     </div>
   );
 }
