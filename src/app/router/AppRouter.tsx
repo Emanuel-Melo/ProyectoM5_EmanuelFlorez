@@ -7,17 +7,26 @@ import RegisterPage from "../../features/auth/pages/RegisterPage";
 import AdminPage from "../../features/admin/pages/AdminPage";
 import ProductDetailPage from "../../features/products/pages/ProductDetailPage";
 import ProductsPage from "../../features/products/pages/ProductsPage";
+import FavoritesPage from "../../features/home/pages/FavoritesPage";
+import CartPage from "../../features/home/pages/CartPage";
+import ShippingPage from "../../features/home/pages/ShippingPage";
 import { AdminRoute } from "../../shared/guards/AdminRoute";
 import { ProtectedRoute } from "../../shared/guards/ProtectedRoute";
+import MainLayout from "../../shared/layouts/MainLayout";
 
 function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:productId" element={<ProductDetailPage />} />
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/envios" element={<ShippingPage />} />
+        </Route>
       </Route>
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminPage />} />

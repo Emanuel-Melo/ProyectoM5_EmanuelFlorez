@@ -1,9 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
-import logo from "../../../assets/images/Logo Buy.png";
-import { useAuth } from "../../auth/hooks/useAuth";
-import { authService } from "../../auth/services/authService";
+import { Link } from "react-router-dom";
 import { useProducts } from "../../products/hooks/useProducts";
 import type { Product } from "../../products/types/product.types";
 import "./HomePage.css";
@@ -51,15 +47,8 @@ function ProductMiniCard({ product }: { product: Product }) {
 }
 
 function HomePage() {
-  const { user, role } = useAuth();
   const { categories, products, loading } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await authService.logout();
-    navigate("/", { replace: true });
-  };
 
   const visibleProducts = useMemo(() => {
     const normalizedSearch = normalizeText(searchTerm);
@@ -85,51 +74,9 @@ function HomePage() {
   );
 
   const favorites = products.slice(0, 3);
-  const userInitial = user?.email?.charAt(0).toUpperCase() ?? "U";
 
   return (
     <main className="shop-home">
-      <header className="shop-header">
-        <Link className="shop-brand" to="/home" aria-label="Panel Buy">
-          <img src={logo} alt="Buy" />
-          <span>Panel Buy</span>
-        </Link>
-
-        <nav className="shop-nav" aria-label="Navegacion principal">
-          <Link className="active" to="/home">
-            Home
-          </Link>
-          <Link to="/products">Productos</Link>
-          <Link to="/products">Favoritos</Link>
-          <Link to="/products">Carrito</Link>
-          <Link to="/products">Envios</Link>
-          {role === "admin" && <Link to="/admin">Admin</Link>}
-        </nav>
-
-        <label className="shop-search">
-          <span>Buscar</span>
-          <input
-            type="search"
-            value={searchTerm}
-            placeholder="Buscar productos..."
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </label>
-
-        <div className="shop-user">
-          <Link className="cart-indicator" to="/products" aria-label="Carrito">
-            <span>1</span>
-          </Link>
-          <div>
-            <strong>{user?.email ?? "Usuario"}</strong>
-            <small>{role ?? "cliente"}</small>
-          </div>
-          <button type="button" onClick={handleLogout} aria-label="Cerrar sesion">
-            {userInitial}
-          </button>
-        </div>
-      </header>
-
       <section className="shop-grid">
         <div className="shop-main-column">
           <section className="shop-hero">
