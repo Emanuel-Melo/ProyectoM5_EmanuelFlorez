@@ -14,14 +14,13 @@ type Product = Record<string, unknown> & {
   id?: string | number;
 };
 
-const requiredEnvKeys = [
-  "VITE_FIREBASE_API_KEY",
-  "VITE_FIREBASE_AUTH_DOMAIN",
-  "VITE_FIREBASE_PROJECT_ID",
-  "VITE_FIREBASE_STORAGE_BUCKET",
-  "VITE_FIREBASE_MESSAGING_SENDER_ID",
-  "VITE_FIREBASE_APP_ID",
-] as const;
+type FirebaseEnvKey =
+  | "VITE_FIREBASE_API_KEY"
+  | "VITE_FIREBASE_AUTH_DOMAIN"
+  | "VITE_FIREBASE_PROJECT_ID"
+  | "VITE_FIREBASE_STORAGE_BUCKET"
+  | "VITE_FIREBASE_MESSAGING_SENDER_ID"
+  | "VITE_FIREBASE_APP_ID";
 
 const loadEnvFile = () => {
   const envPath = resolve(".env");
@@ -55,7 +54,7 @@ const loadEnvFile = () => {
   }
 };
 
-const getRequiredEnv = (key: (typeof requiredEnvKeys)[number]) => {
+const getRequiredEnv = (key: FirebaseEnvKey) => {
   const value = process.env[key];
 
   if (!value) {

@@ -32,6 +32,9 @@ function HomePage() {
         </div>
 
         <div className="home-actions">
+          <Link className="button" to="/products">
+            Ver productos
+          </Link>
           {role === "admin" && (
             <Link className="button button-secondary" to="/admin">
               Ir al admin

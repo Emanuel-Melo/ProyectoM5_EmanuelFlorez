@@ -5,6 +5,8 @@ import LandingPage from "../../features/home/pages/LandingPage";
 import LoginPage from "../../features/auth/pages/LoginPage";
 import RegisterPage from "../../features/auth/pages/RegisterPage";
 import AdminPage from "../../features/admin/pages/AdminPage";
+import ProductDetailPage from "../../features/products/pages/ProductDetailPage";
+import ProductsPage from "../../features/products/pages/ProductsPage";
 import { AdminRoute } from "../../shared/guards/AdminRoute";
 import { ProtectedRoute } from "../../shared/guards/ProtectedRoute";
 
@@ -14,6 +16,8 @@ function AppRouter() {
       <Route path="/" element={<LandingPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:productId" element={<ProductDetailPage />} />
       </Route>
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminPage />} />
