@@ -8,7 +8,7 @@ function LandingPage() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingScreen label="Validando sesion" />;
+    return <LoadingScreen />;
   }
 
   if (user) {

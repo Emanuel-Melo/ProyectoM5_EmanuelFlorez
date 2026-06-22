@@ -13,7 +13,7 @@ function App() {
   }, []);
 
   if (booting) {
-    return <LoadingScreen label="Preparando experiencia" />;
+    return <LoadingScreen />;
   }
 
   return <AppRouter />;
