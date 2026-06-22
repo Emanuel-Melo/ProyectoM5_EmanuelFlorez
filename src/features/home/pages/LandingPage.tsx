@@ -8,7 +8,9 @@ function LandingPage() {
   if (loading) {
     return (
       <main className="app-shell">
-        <p>Cargando sesion...</p>
+        <p className="auth-loader" role="status">
+          Cargando sesion...
+        </p>
       </main>
     );
   }

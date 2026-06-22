@@ -21,7 +21,11 @@ const authErrorMessages: Record<string, string> = {
   "auth/missing-password": "Ingresa tu contrasena.",
   "auth/email-already-in-use": "Este correo ya esta registrado.",
   "auth/weak-password": "La contrasena debe tener minimo 6 caracteres.",
+  "auth/network-request-failed": "No se pudo conectar con Firebase. Revisa tu conexion.",
+  "auth/popup-blocked": "El navegador bloqueo la ventana de Google.",
   "auth/popup-closed-by-user": "La ventana de Google se cerro antes de iniciar sesion.",
+  "auth/user-disabled": "Este usuario esta deshabilitado.",
+  "auth/too-many-requests": "Demasiados intentos. Espera unos minutos e intenta de nuevo.",
 };
 
 export const getAuthErrorMessage = (error: unknown) => {

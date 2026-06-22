@@ -6,7 +6,13 @@ export function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <p>Cargando sesion...</p>;
+    return (
+      <main className="app-shell">
+        <p className="auth-loader" role="status">
+          Cargando sesion...
+        </p>
+      </main>
+    );
   }
 
   if (!user) {

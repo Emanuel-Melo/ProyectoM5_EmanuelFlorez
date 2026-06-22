@@ -197,6 +197,16 @@ a {
   outline: 3px solid rgba(47, 133, 90, 0.18);
 }
 
+.field input[aria-invalid="true"] {
+  border-color: #c53030;
+}
+
+.field-error {
+  margin: 0;
+  color: #9b2c2c;
+  font-size: 0.9rem;
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -250,6 +260,12 @@ a {
   padding: 12px;
   color: #9b2c2c;
   background: #fff5f5;
+}
+
+.auth-loader {
+  margin: 0;
+  color: #526071;
+  font-weight: 700;
 }
 
 .session-card {
