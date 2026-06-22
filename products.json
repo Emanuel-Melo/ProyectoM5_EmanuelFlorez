@@ -1,0 +1,137 @@
+[
+  {
+    "name": "iPhone 17",
+    "description": "Smartphone Apple de última generación con chip A19.",
+    "price": 4999,
+    "stock": 25,
+    "category": "smartphones",
+    "imageUrl": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9",
+    "active": true
+  },
+  {
+    "name": "Samsung Galaxy S26",
+    "description": "Smartphone Samsung con pantalla AMOLED de alta resolución.",
+    "price": 4699,
+    "stock": 18,
+    "category": "smartphones",
+    "imageUrl": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf",
+    "active": true
+  },
+  {
+    "name": "Google Pixel 11",
+    "description": "Smartphone Google con Android puro y cámara avanzada.",
+    "price": 4299,
+    "stock": 12,
+    "category": "smartphones",
+    "imageUrl": "https://images.unsplash.com/photo-1598327105666-5b89351aff97",
+    "active": true
+  },
+  {
+    "name": "MacBook Air M5",
+    "description": "Laptop ultraligera con chip Apple Silicon.",
+    "price": 7999,
+    "stock": 10,
+    "category": "laptops",
+    "imageUrl": "https://images.unsplash.com/photo-1517336714739-489689fd1ca8",
+    "active": true
+  },
+  {
+    "name": "Dell XPS 15",
+    "description": "Laptop premium para productividad y desarrollo.",
+    "price": 6999,
+    "stock": 8,
+    "category": "laptops",
+    "imageUrl": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853",
+    "active": true
+  },
+  {
+    "name": "Lenovo ThinkPad X1",
+    "description": "Laptop empresarial resistente y potente.",
+    "price": 6499,
+    "stock": 6,
+    "category": "laptops",
+    "imageUrl": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2",
+    "active": true
+  },
+  {
+    "name": "iPad Pro M5",
+    "description": "Tablet profesional con pantalla Liquid Retina.",
+    "price": 4299,
+    "stock": 15,
+    "category": "tablets",
+    "imageUrl": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0",
+    "active": true
+  },
+  {
+    "name": "Samsung Galaxy Tab S11",
+    "description": "Tablet Android premium para trabajo y entretenimiento.",
+    "price": 3499,
+    "stock": 14,
+    "category": "tablets",
+    "imageUrl": "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9",
+    "active": true
+  },
+  {
+    "name": "AirPods Pro 3",
+    "description": "Auriculares inalámbricos con cancelación de ruido.",
+    "price": 1199,
+    "stock": 40,
+    "category": "audio",
+    "imageUrl": "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46",
+    "active": true
+  },
+  {
+    "name": "Sony WH-1000XM7",
+    "description": "Auriculares over-ear con audio premium.",
+    "price": 1699,
+    "stock": 20,
+    "category": "audio",
+    "imageUrl": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
+    "active": true
+  },
+  {
+    "name": "Logitech MX Master 4",
+    "description": "Mouse inalámbrico para productividad profesional.",
+    "price": 499,
+    "stock": 35,
+    "category": "accessories",
+    "imageUrl": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46",
+    "active": true
+  },
+  {
+    "name": "Logitech MX Keys S",
+    "description": "Teclado inalámbrico retroiluminado.",
+    "price": 599,
+    "stock": 30,
+    "category": "accessories",
+    "imageUrl": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae",
+    "active": true
+  },
+  {
+    "name": "LG UltraFine 32",
+    "description": "Monitor profesional 4K de 32 pulgadas.",
+    "price": 2199,
+    "stock": 9,
+    "category": "monitors",
+    "imageUrl": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf",
+    "active": true
+  },
+  {
+    "name": "Samsung Odyssey G8",
+    "description": "Monitor gaming ultrawide de alto rendimiento.",
+    "price": 2899,
+    "stock": 7,
+    "category": "monitors",
+    "imageUrl": "https://images.unsplash.com/photo-1586210579191-33b45e38fa2c",
+    "active": true
+  },
+  {
+    "name": "ASUS ROG Swift 27",
+    "description": "Monitor gaming profesional con alta tasa de refresco.",
+    "price": 2599,
+    "stock": 5,
+    "category": "monitors",
+    "imageUrl": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5",
+    "active": true
+  }
+]
