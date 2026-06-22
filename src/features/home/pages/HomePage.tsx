@@ -1,10 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../auth/hooks/useAuth";
 import { authService } from "../../auth/services/authService";
 
 function HomePage() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -26,9 +26,15 @@ function HomePage() {
         <div className="session-card">
           <strong>Usuario conectado</strong>
           <p>{user?.email ?? "Usuario sin correo disponible"}</p>
+          <p>Rol: {role ?? "Sin rol asignado"}</p>
         </div>
 
         <div className="home-actions">
+          {role === "admin" && (
+            <Link className="button button-secondary" to="/admin">
+              Ir al admin
+            </Link>
+          )}
           <button className="button button-danger" type="button" onClick={handleLogout}>
             Cerrar sesion
           </button>

@@ -5,6 +5,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 
 import { auth } from "../../../shared/services/firebase/auth";
+import type { UserProfile } from "../types/auth.types";
+import { userService } from "../services/userService";
 import { AuthContext } from "./authContextValue";
 
 interface Props {
@@ -13,23 +15,53 @@ interface Props {
 
 export function AuthProvider({ children }: Props) {
   const [user, setUser] = useState<User | null>(null);
-
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    let isActive = true;
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
       setUser(firebaseUser);
 
-      setLoading(false);
+      if (!firebaseUser) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userProfile = await userService.getUserProfile(firebaseUser.uid);
+
+        if (isActive) {
+          setProfile(userProfile);
+        }
+      } catch (error) {
+        console.error(error);
+
+        if (isActive) {
+          setProfile(null);
+        }
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      isActive = false;
+      unsubscribe();
+    };
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        profile,
+        role: profile?.role ?? null,
         loading,
       }}
     >
