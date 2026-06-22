@@ -1,5 +1,6 @@
 import logo from "../../assets/images/Logo Buy.png";
 import wordmark from "../../assets/images/Escritura Buy.png";
+import "./BrandMark.css";
 
 interface BrandMarkProps {
   compact?: boolean;

@@ -1,0 +1,199 @@
+:root {
+  --buy-black: #07080a;
+  --buy-panel: #101114;
+  --buy-panel-soft: #181a1f;
+  --buy-text: #f6f7f9;
+  --buy-muted: #b6bdc8;
+  --buy-line: rgba(255, 255, 255, 0.14);
+  --buy-red: #f20f2f;
+  --buy-red-dark: #b4071e;
+  --buy-blue: #1fb6ff;
+  --buy-blue-soft: rgba(31, 182, 255, 0.2);
+  --buy-white: #ffffff;
+  --shadow-strong: 0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--buy-black);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--buy-text);
+  background: var(--buy-black);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 4vw, 48px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background:
+    linear-gradient(115deg, rgba(242, 15, 47, 0.16) 0 13%, transparent 13% 100%),
+    linear-gradient(294deg, rgba(31, 182, 255, 0.16) 0 12%, transparent 12% 100%),
+    linear-gradient(135deg, #07080a 0%, #101114 52%, #050506 100%);
+}
+
+.app-shell::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent 78%);
+}
+
+.app-shell::after {
+  position: absolute;
+  right: -18vw;
+  bottom: -22vw;
+  z-index: -1;
+  width: min(58vw, 720px);
+  aspect-ratio: 1;
+  content: "";
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: rotate(-18deg);
+  background:
+    linear-gradient(135deg, transparent 0 48%, rgba(242, 15, 47, 0.5) 48% 51%, transparent 51%),
+    linear-gradient(45deg, transparent 0 58%, rgba(31, 182, 255, 0.36) 58% 61%, transparent 61%);
+}
+
+.app-shell-hero {
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--buy-blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 11px 18px;
+  color: var(--buy-white);
+  background: linear-gradient(135deg, var(--buy-red), var(--buy-red-dark));
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #ff2240, var(--buy-red));
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+.button-secondary {
+  color: var(--buy-white);
+  border-color: rgba(31, 182, 255, 0.6);
+  background: rgba(31, 182, 255, 0.12);
+}
+
+.button-secondary:hover {
+  background: rgba(31, 182, 255, 0.22);
+}
+
+.button-danger {
+  background: rgba(242, 15, 47, 0.14);
+  border-color: rgba(242, 15, 47, 0.62);
+}
+
+.button-danger:hover {
+  background: rgba(242, 15, 47, 0.28);
+}
+
+.text-link {
+  color: var(--buy-blue);
+  font-weight: 900;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.error-message {
+  margin: 0;
+  border: 1px solid rgba(242, 15, 47, 0.34);
+  border-radius: 8px;
+  padding: 12px;
+  color: #ffd9df;
+  background: rgba(242, 15, 47, 0.14);
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    place-items: start center;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

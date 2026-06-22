@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { LoginForm } from "../components/LoginForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
+import "../auth.css";
 
 function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");

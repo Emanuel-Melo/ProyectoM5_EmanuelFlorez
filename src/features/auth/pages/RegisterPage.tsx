@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { RegisterForm } from "../components/RegisterForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
+import "../auth.css";
 
 function RegisterPage() {
   const [errorMessage, setErrorMessage] = useState("");

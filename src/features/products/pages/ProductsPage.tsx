@@ -4,6 +4,7 @@ import { ProductFilters } from "../components/ProductFilters";
 import { ProductGrid } from "../components/ProductGrid";
 import { SearchBar } from "../components/SearchBar";
 import { useProducts } from "../hooks/useProducts";
+import "../products.css";
 
 function ProductsPage() {
   const {

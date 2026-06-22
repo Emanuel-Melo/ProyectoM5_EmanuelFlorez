@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { LoadingScreen } from "../../../shared/components/LoadingScreen";
 import { useAuth } from "../../auth/hooks/useAuth";
+import "./LandingPage.css";
 
 function LandingPage() {
   const { user, loading } = useAuth();

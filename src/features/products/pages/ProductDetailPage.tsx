@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 
 import { useProductDetail } from "../hooks/useProductDetail";
+import "../products.css";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   currency: "COP",

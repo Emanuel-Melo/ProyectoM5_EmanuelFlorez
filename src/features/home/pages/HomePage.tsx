@@ -6,6 +6,7 @@ import { useAuth } from "../../auth/hooks/useAuth";
 import { authService } from "../../auth/services/authService";
 import { useProducts } from "../../products/hooks/useProducts";
 import type { Product } from "../../products/types/product.types";
+import "./HomePage.css";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   currency: "COP",

@@ -1,0 +1,78 @@
+.home-layout {
+  width: min(100%, 1120px);
+}
+
+.home-panel {
+  position: relative;
+  width: min(100%, 760px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--buy-line);
+  border-radius: 8px;
+  padding: clamp(26px, 5vw, 42px);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
+    rgba(16, 17, 20, 0.92);
+  box-shadow: var(--shadow-strong);
+  backdrop-filter: blur(18px);
+}
+
+.home-panel::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  content: "";
+  background: linear-gradient(90deg, var(--buy-red), var(--buy-blue));
+}
+
+.home-panel h1 {
+  margin: 0;
+  color: var(--buy-text);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.home-panel > p {
+  color: var(--buy-muted);
+  line-height: 1.65;
+}
+
+.session-card {
+  margin-top: 24px;
+  border: 1px solid var(--buy-line);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.session-card p {
+  margin: 8px 0 0;
+  color: var(--buy-muted);
+  overflow-wrap: anywhere;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+@media (max-width: 560px) {
+  .home-panel {
+    padding: 22px;
+  }
+
+  .home-panel h1 {
+    line-height: 1.05;
+  }
+
+  .home-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

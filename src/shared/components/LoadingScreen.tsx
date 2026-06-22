@@ -1,4 +1,5 @@
 import loadingVideo from "../../assets/loading/video loading.mp4";
+import "./LoadingScreen.css";
 
 export function LoadingScreen() {
   return (

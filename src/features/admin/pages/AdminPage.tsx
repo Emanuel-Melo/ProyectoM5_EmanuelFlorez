@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { useAuth } from "../../auth/hooks/useAuth";
+import "./AdminPage.css";
 
 function AdminPage() {
   const { user, role } = useAuth();

@@ -1,0 +1,99 @@
+.auth-card {
+  position: relative;
+  width: min(100%, 460px);
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--buy-line);
+  border-radius: 8px;
+  padding: clamp(26px, 5vw, 42px);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
+    rgba(16, 17, 20, 0.92);
+  box-shadow: var(--shadow-strong);
+  backdrop-filter: blur(18px);
+}
+
+.auth-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  content: "";
+  background: linear-gradient(90deg, var(--buy-red), var(--buy-blue));
+}
+
+.auth-card h1 {
+  margin: 0;
+  color: var(--buy-text);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 0.98;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.auth-card > p {
+  color: var(--buy-muted);
+  line-height: 1.65;
+}
+
+.form-stack {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field label {
+  color: var(--buy-white);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.field input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 11px 13px;
+  color: var(--buy-text);
+  background: rgba(255, 255, 255, 0.07);
+  outline: 0;
+}
+
+.field input:focus {
+  border-color: var(--buy-blue);
+  box-shadow: 0 0 0 4px var(--buy-blue-soft);
+}
+
+.field input[aria-invalid="true"] {
+  border-color: var(--buy-red);
+}
+
+.field-error {
+  margin: 0;
+  color: #ff8a9b;
+  font-size: 0.9rem;
+}
+
+.auth-loader {
+  margin: 0;
+  color: var(--buy-white);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .auth-card {
+    padding: 22px;
+  }
+
+  .auth-card h1 {
+    line-height: 1.05;
+  }
+}
