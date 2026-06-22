@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { BrandMark } from "../../../shared/components/BrandMark";
 import { LoginForm } from "../components/LoginForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
 
@@ -45,9 +46,10 @@ function LoginPage() {
   return (
     <main className="app-shell">
       <section className="auth-card">
+        <BrandMark compact />
         <p className="eyebrow">Acceso</p>
         <h1>Iniciar sesion</h1>
-        <p>Entra con tu usuario de Firebase para continuar al home privado.</p>
+        <p>Entra con tu usuario de Firebase y continua al panel privado.</p>
 
         <LoginForm
           errorMessage={errorMessage}

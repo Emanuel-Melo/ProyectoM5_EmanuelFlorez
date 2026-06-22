@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { BrandMark } from "../../../shared/components/BrandMark";
 import { RegisterForm } from "../components/RegisterForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
 
@@ -29,9 +30,10 @@ function RegisterPage() {
   return (
     <main className="app-shell">
       <section className="auth-card">
+        <BrandMark compact />
         <p className="eyebrow">Nueva cuenta</p>
         <h1>Registro</h1>
-        <p>Crea un usuario con correo y contrasena para entrar al home.</p>
+        <p>Crea un usuario con correo y contrasena para entrar al panel.</p>
 
         <RegisterForm
           errorMessage={errorMessage}

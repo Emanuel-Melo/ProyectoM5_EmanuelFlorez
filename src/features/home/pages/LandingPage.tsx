@@ -1,18 +1,14 @@
 import { Link, Navigate } from "react-router-dom";
 
+import { BrandMark } from "../../../shared/components/BrandMark";
+import { LoadingScreen } from "../../../shared/components/LoadingScreen";
 import { useAuth } from "../../auth/hooks/useAuth";
 
 function LandingPage() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <main className="app-shell">
-        <p className="auth-loader" role="status">
-          Cargando sesion...
-        </p>
-      </main>
-    );
+    return <LoadingScreen label="Validando sesion" />;
   }
 
   if (user) {
@@ -20,14 +16,15 @@ function LandingPage() {
   }
 
   return (
-    <main className="app-shell">
+    <main className="app-shell app-shell-hero">
       <section className="auth-layout hero">
-        <div className="hero-panel">
-          <p className="eyebrow">Proyecto M5</p>
-          <h1>Bienvenido a tu ecommerce con Firebase</h1>
+        <div className="hero-panel hero-panel-primary">
+          <BrandMark />
+          <p className="eyebrow">Proyecto M5 Ecommerce</p>
+          <h1>Compra con precision, velocidad y estilo.</h1>
           <p className="hero-copy">
-            Entra con tu cuenta para continuar al panel principal, o crea un
-            usuario nuevo si todavia no tienes acceso.
+            Una entrada premium para tu tienda: autenticacion con Firebase,
+            acceso rapido y una presencia visual guiada por la energia de Buy.
           </p>
 
           <div className="hero-actions">
@@ -41,26 +38,27 @@ function LandingPage() {
         </div>
 
         <aside className="hero-panel guide-panel" aria-label="Guia de acceso">
-          <h2>Como empezar</h2>
+          <BrandMark compact />
+          <h2>Acceso rapido</h2>
           <ol className="guide-list">
             <li>
               <span className="guide-step">1</span>
               <div>
-                <strong>Inicia sesion</strong>
+                <strong>Identificate</strong>
                 <p>Usa tu correo y contrasena o entra con Google.</p>
               </div>
             </li>
             <li>
               <span className="guide-step">2</span>
               <div>
-                <strong>Crea una cuenta</strong>
+                <strong>Activa tu cuenta</strong>
                 <p>Registra un usuario nuevo si aun no existe en Firebase.</p>
               </div>
             </li>
             <li>
               <span className="guide-step">3</span>
               <div>
-                <strong>Entra al home</strong>
+                <strong>Entra al cockpit</strong>
                 <p>Despues de autenticarte veras tu sesion activa.</p>
               </div>
             </li>

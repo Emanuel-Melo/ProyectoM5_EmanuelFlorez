@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import { BrandMark } from "../../../shared/components/BrandMark";
 import { useAuth } from "../../auth/hooks/useAuth";
 
 function AdminPage() {
@@ -8,6 +9,7 @@ function AdminPage() {
   return (
     <main className="app-shell">
       <section className="home-layout home-panel">
+        <BrandMark compact />
         <p className="eyebrow">Panel admin</p>
         <h1>Admin</h1>
 
