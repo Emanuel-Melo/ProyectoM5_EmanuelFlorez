@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../../cart/context/CartContext";
 import { useProducts } from "../../products/hooks/useProducts";
 import type { Product } from "../../products/types/product.types";
 import "./HomePage.css";
@@ -22,8 +23,6 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryStyles = ["red", "blue", "green", "purple", "amber", "cyan"];
-
-const normalizeText = (value: string) => value.trim().toLowerCase();
 
 function ProductMiniCard({ product }: { product: Product }) {
   return (
@@ -48,20 +47,9 @@ function ProductMiniCard({ product }: { product: Product }) {
 
 function HomePage() {
   const { categories, products, loading } = useProducts();
-  const [searchTerm, setSearchTerm] = useState("");
+  const { count } = useCart();
 
-  const visibleProducts = useMemo(() => {
-    const normalizedSearch = normalizeText(searchTerm);
-    const activeProducts = normalizedSearch
-      ? products.filter((product) =>
-          [product.name, product.description, product.category]
-            .map(normalizeText)
-            .some((value) => value.includes(normalizedSearch))
-        )
-      : products;
-
-    return activeProducts.slice(0, 4);
-  }, [products, searchTerm]);
+  const visibleProducts = useMemo(() => products.slice(0, 4), [products]);
 
   const categoryCards = useMemo(
     () =>
@@ -81,6 +69,14 @@ function HomePage() {
         <div className="shop-main-column">
           <section className="shop-hero">
             <div className="shop-hero-copy">
+              <Link className="hero-cart-banner" to="/cart">
+                <span className="hero-cart-icon" aria-hidden="true" />
+                <div>
+                  <strong>{count} {count === 1 ? "producto" : "productos"}</strong>
+                  <small>{count ? "Listo para finalizar tu compra" : "Aún no has agregado productos"}</small>
+                </div>
+              </Link>
+
               <h1>
                 Tecnologia que impulsa <span>tu mundo</span>
               </h1>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { Product } from "../../products/types/product.types";
 
@@ -9,6 +9,7 @@ type CartContextValue = {
   count: number;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clear: () => void;
 };
 
@@ -57,12 +58,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((p) => p.id !== productId));
   };
 
+  const updateQuantity = (productId: string, quantity: number) => {
+    setItems((prev) => {
+      if (quantity <= 0) {
+        return prev.filter((p) => p.id !== productId);
+      }
+      return prev.map((item) =>
+        item.id === productId ? { ...item, quantity } : item
+      );
+    });
+  };
+
   const clear = () => setItems([]);
 
   const count = items.reduce((s, it) => s + (it.quantity || 0), 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clear, count }}>
+    <CartContext.Provider
+      value={{ items, addItem, removeItem, updateQuantity, clear, count }}
+    >
       {children}
     </CartContext.Provider>
   );
