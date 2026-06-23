@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 
 import { db } from "../../../shared/services/firebase/firestore";
+import {
+  applySessionDiscount,
+  ensureDiscountProductIds,
+  getStoredDiscountProductIds,
+} from "./discountUtilities";
 import type { Product } from "../types/product.types";
 
 const mapProduct = (id: string, data: Record<string, unknown>): Product => ({
@@ -50,10 +55,23 @@ export function useProductDetail(productId?: string) {
           productSnapshot.data()
         );
 
+        let discountIds = getStoredDiscountProductIds();
+
+        if (!discountIds) {
+          const allProductsSnapshot = await getDocs(collection(db, "products"));
+          const allProductIds = allProductsSnapshot.docs.map((productDoc) => productDoc.id);
+          discountIds = ensureDiscountProductIds(allProductIds);
+        }
+
+        const productWithDiscount = applySessionDiscount(
+          productFromFirestore,
+          discountIds
+        );
+
         if (!ignore) {
-          setProduct(productFromFirestore.active ? productFromFirestore : null);
+          setProduct(productWithDiscount.active ? productWithDiscount : null);
           setError(
-            productFromFirestore.active
+            productWithDiscount.active
               ? null
               : "El producto no esta disponible actualmente."
           );

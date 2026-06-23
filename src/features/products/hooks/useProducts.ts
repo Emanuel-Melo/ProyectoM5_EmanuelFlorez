@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "../../../shared/services/firebase/firestore";
+import { applySessionDiscount, ensureDiscountProductIds } from "./discountUtilities";
 import type { Product, ProductFiltersState } from "../types/product.types";
 
 const initialFilters: ProductFiltersState = {
@@ -44,8 +45,16 @@ export function useProducts() {
           .map((productDoc) => mapProduct(productDoc.id, productDoc.data()))
           .filter((product) => product.active);
 
+        const discountIds = ensureDiscountProductIds(
+          productsFromFirestore.map((product) => product.id)
+        );
+
+        const productsWithDiscounts = productsFromFirestore.map((product) =>
+          applySessionDiscount(product, discountIds)
+        );
+
         if (!ignore) {
-          setProducts(productsFromFirestore);
+          setProducts(productsWithDiscounts);
         }
       } catch (fetchError) {
         if (!ignore) {

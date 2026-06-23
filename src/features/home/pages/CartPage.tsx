@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../cart/context/CartContext";
+import { useAuth } from "../../auth/hooks/useAuth";
 import "./HomePage.css";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
@@ -9,18 +10,34 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
 });
 
+const getDiscountedItemPrice = (item: { price: number; discountPercent?: number }) =>
+  item.discountPercent ? Math.round(item.price * (1 - item.discountPercent / 100)) : item.price;
+
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, clear } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const total = items.reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0);
+  const customerDiscountKey = user ? `buy_first_purchase_used_${user.uid}` : "buy_first_purchase_used_guest_v1";
+  const firstPurchaseDiscount = !localStorage.getItem(customerDiscountKey) ? 50 : 0;
+
+  const total = items.reduce((sum, item) => {
+    const unitPrice = getDiscountedItemPrice(item);
+    return sum + unitPrice * (item.quantity || 1);
+  }, 0);
+
+  const discountAmount = Math.round((total * firstPurchaseDiscount) / 100);
+  const totalAfterDiscount = total - discountAmount;
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
       // Simular llamada a API / trámites de pago
       await new Promise((res) => setTimeout(res, 1000));
+      if (firstPurchaseDiscount > 0) {
+        localStorage.setItem(customerDiscountKey, "true");
+      }
       alert("Compra completada correctamente. Gracias por su compra.");
       clear();
       navigate("/home");
@@ -87,7 +104,7 @@ export default function CartPage() {
                     </div>
                     <div className="price-block">
                       <small>Precio unitario</small>
-                      <strong>{currencyFormatter.format(it.price)}</strong>
+                      <strong>{currencyFormatter.format(getDiscountedItemPrice(it))}</strong>
                     </div>
                   </div>
                 </div>
@@ -95,7 +112,9 @@ export default function CartPage() {
                 <div className="cart-item-actions">
                   <div>
                     <span className="cart-item-total">
-                      {currencyFormatter.format((it.price || 0) * (it.quantity || 1))}
+                      {currencyFormatter.format(
+                        getDiscountedItemPrice(it) * (it.quantity || 1)
+                      )}
                     </span>
                     <button
                       type="button"
@@ -122,18 +141,25 @@ export default function CartPage() {
                   <dt>Subtotal</dt>
                   <dd>{currencyFormatter.format(total)}</dd>
                 </div>
+                {firstPurchaseDiscount > 0 ? (
+                  <div>
+                    <dt>Descuento primera compra</dt>
+                    <dd>-{currencyFormatter.format(discountAmount)}</dd>
+                  </div>
+                ) : (
+                  <div>
+                    <dt>Descuento</dt>
+                    <dd>- $0</dd>
+                  </div>
+                )}
                 <div>
                   <dt>Envío</dt>
                   <dd>Gratis</dd>
                 </div>
-                <div>
-                  <dt>Descuento</dt>
-                  <dd>- $0</dd>
-                </div>
               </dl>
               <div className="summary-total">
                 <span>Total</span>
-                <strong>{currencyFormatter.format(total)}</strong>
+                <strong>{currencyFormatter.format(totalAfterDiscount)}</strong>
               </div>
               <button
                 className="button button-primary"

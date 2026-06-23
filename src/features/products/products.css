@@ -241,6 +241,41 @@
   gap: 12px;
 }
 
+.product-card-price-group,
+.product-detail-price-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-card-discounted,
+.product-detail-discounted {
+  color: var(--buy-white);
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.product-card-original,
+.product-detail-original {
+  color: var(--buy-muted);
+  text-decoration: line-through;
+  font-size: 1rem;
+}
+
+.product-card-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(31, 182, 255, 0.15);
+  color: var(--buy-blue);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .add-feedback {
   margin: 0;
   padding: 10px 12px;

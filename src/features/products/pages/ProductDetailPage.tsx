@@ -62,7 +62,25 @@ function ProductDetailPage() {
           <p>{product.description}</p>
 
           <div className="product-detail-price">
-            {currencyFormatter.format(product.price)}
+            {product.discountPercent ? (
+              <div className="product-detail-price-group">
+                <span className="product-detail-discounted">
+                  {currencyFormatter.format(
+                    Math.round(product.price * (1 - product.discountPercent / 100))
+                  )}
+                </span>
+                <strong className="product-detail-original">
+                  {currencyFormatter.format(product.price)}
+                </strong>
+              </div>
+            ) : (
+              <strong>{currencyFormatter.format(product.price)}</strong>
+            )}
+            {product.discountLabel ? (
+              <small className="product-card-discount-badge">
+                {product.discountLabel}
+              </small>
+            ) : null}
           </div>
 
           <dl className="product-specs">

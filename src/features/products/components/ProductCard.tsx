@@ -15,6 +15,11 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
 });
 
+const getDiscountedPrice = (product: Product) => {
+  if (!product.discountPercent) return product.price;
+  return Math.round(product.price * (1 - product.discountPercent / 100));
+};
+
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -59,7 +64,19 @@ export function ProductCard({ product }: ProductCardProps) {
         <p>{product.description}</p>
 
         <div className="product-card-footer">
-          <strong>{currencyFormatter.format(product.price)}</strong>
+          {product.discountPercent ? (
+            <div className="product-card-price-group">
+              <span className="product-card-discounted">
+                {currencyFormatter.format(getDiscountedPrice(product))}
+              </span>
+              <strong className="product-card-original">
+                {currencyFormatter.format(product.price)}
+              </strong>
+            </div>
+          ) : (
+            <strong>{currencyFormatter.format(product.price)}</strong>
+          )}
+          {product.discountLabel ? <small className="product-card-discount-badge">{product.discountLabel}</small> : null}
           <div className="product-card-actions">
             <button
               className="button"

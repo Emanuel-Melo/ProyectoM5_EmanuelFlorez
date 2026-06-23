@@ -7,6 +7,8 @@ export type Product = {
   category: string;
   imageUrl: string;
   active?: boolean;
+  discountPercent?: number;
+  discountLabel?: string;
 };
 
 export type ProductFiltersState = {
