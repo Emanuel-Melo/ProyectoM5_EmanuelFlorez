@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import logo from "../../assets/images/Logo Buy.png";
 import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useCart } from "../../features/cart/context/CartContext";
 import { authService } from "../../features/auth/services/authService";
 import "../../features/home/pages/HomePage.css";
 
@@ -23,6 +24,7 @@ export function Header() {
   };
 
   const userInitial = user?.email?.charAt(0).toUpperCase() ?? "U";
+  const { count } = useCart();
 
   return (
     <header className="shop-header">
@@ -61,7 +63,7 @@ export function Header() {
 
       <div className="shop-user">
         <Link className="cart-indicator" to="/cart" aria-label="Carrito">
-          <span>1</span>
+          <span>{count}</span>
         </Link>
         <div>
           <strong>{user?.email ?? "Usuario"}</strong>
