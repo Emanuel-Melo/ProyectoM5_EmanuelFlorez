@@ -32,7 +32,11 @@ export function AuthProvider({ children }: Props) {
       }
 
       try {
-        const userProfile = await userService.getUserProfile(firebaseUser.uid);
+        const email = firebaseUser.email ?? "";
+        const userProfile = await userService.ensureUserProfile(
+          firebaseUser.uid,
+          email
+        );
 
         if (isActive) {
           setProfile(userProfile);

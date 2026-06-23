@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { RegisterForm } from "../components/RegisterForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
+import { userService } from "../services/userService";
 import "../auth.css";
 
 function RegisterPage() {
@@ -17,7 +18,14 @@ function RegisterPage() {
       setErrorMessage("");
       setLoading(true);
 
-      await authService.register(email, password);
+      const authResult = await authService.register(email, password);
+      const firebaseUser = authResult.user;
+
+      await userService.createUserProfile({
+        uid: firebaseUser.uid,
+        email: firebaseUser.email ?? email,
+        role: "customer",
+      });
 
       navigate("/home", { replace: true });
     } catch (error) {
