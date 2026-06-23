@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import type { ReactNode } from "react";
 import type { Product } from "../../products/types/product.types";
+
+import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  getUserFavorites,
+  syncUserFavorites,
+} from "../services/favoriteService";
 
 export type FavoriteItem = Product;
 
@@ -14,17 +20,18 @@ type FavoritesContextValue = {
 };
 
 type FavoritesAction =
+  | { type: "set"; payload: { items: FavoriteItem[] } }
   | { type: "toggle"; payload: { product: Product } }
   | { type: "remove"; payload: { productId: string } }
   | { type: "clear" };
 
-const FAVORITES_KEY = "favorite_items_v1";
+const GUEST_FAVORITES_KEY = "guest_favorite_items_v1";
 
 const FavoritesContext = createContext<FavoritesContextValue | undefined>(undefined);
 
 function readFavoritesFromStorage(): FavoriteItem[] {
   try {
-    const raw = localStorage.getItem(FAVORITES_KEY);
+    const raw = localStorage.getItem(GUEST_FAVORITES_KEY);
     if (!raw) return [];
     return JSON.parse(raw) as FavoriteItem[];
   } catch {
@@ -34,7 +41,7 @@ function readFavoritesFromStorage(): FavoriteItem[] {
 
 function writeFavoritesToStorage(items: FavoriteItem[]) {
   try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(items));
+    localStorage.setItem(GUEST_FAVORITES_KEY, JSON.stringify(items));
   } catch {
     // ignore write errors
   }
@@ -42,6 +49,8 @@ function writeFavoritesToStorage(items: FavoriteItem[]) {
 
 function favoritesReducer(state: FavoriteItem[], action: FavoritesAction): FavoriteItem[] {
   switch (action.type) {
+    case "set":
+      return action.payload.items;
     case "toggle": {
       const product = action.payload.product;
       const existing = state.find((item) => item.id === product.id);
@@ -60,11 +69,51 @@ function favoritesReducer(state: FavoriteItem[], action: FavoritesAction): Favor
 }
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
   const [items, dispatch] = useReducer(favoritesReducer, [], readFavoritesFromStorage);
+  const isInitializing = useRef(true);
 
   useEffect(() => {
+    let ignore = false;
+
+    const loadFavorites = async () => {
+      if (!user) {
+        dispatch({ type: "set", payload: { items: readFavoritesFromStorage() } });
+        isInitializing.current = false;
+        return;
+      }
+
+      try {
+        const userFavorites = await getUserFavorites(user.uid);
+        if (!ignore) {
+          dispatch({ type: "set", payload: { items: userFavorites } });
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!ignore) {
+          isInitializing.current = false;
+        }
+      }
+    };
+
+    void loadFavorites();
+
+    return () => {
+      ignore = true;
+    };
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (user && !loading && !isInitializing.current) {
+      void syncUserFavorites(user.uid, items).catch((error) => {
+        console.error("Error sincronizando favoritos:", error);
+      });
+      return;
+    }
+
     writeFavoritesToStorage(items);
-  }, [items]);
+  }, [items, user?.uid, loading]);
 
   const toggleFavorite = (product: Product) => {
     dispatch({ type: "toggle", payload: { product } });

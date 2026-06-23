@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import type { ReactNode } from "react";
 import type { Product } from "../../products/types/product.types";
+
+import { useAuth } from "../../auth/hooks/useAuth";
+import {
+  getUserCart,
+  syncUserCart,
+} from "../services/cartService";
 
 export type CartItem = Product & { quantity: number };
 
@@ -14,18 +20,19 @@ type CartContextValue = {
 };
 
 type CartAction =
+  | { type: "set"; payload: { items: CartItem[] } }
   | { type: "add"; payload: { product: Product; quantity: number } }
   | { type: "remove"; payload: { productId: string } }
   | { type: "updateQuantity"; payload: { productId: string; quantity: number } }
   | { type: "clear" };
 
-const CART_KEY = "cart_items_v1";
+const GUEST_CART_KEY = "guest_cart_items_v1";
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 function readFromStorage(): CartItem[] {
   try {
-    const raw = localStorage.getItem(CART_KEY);
+    const raw = localStorage.getItem(GUEST_CART_KEY);
     if (!raw) return [];
     return JSON.parse(raw) as CartItem[];
   } catch (err) {
@@ -35,7 +42,7 @@ function readFromStorage(): CartItem[] {
 
 function writeToStorage(items: CartItem[]) {
   try {
-    localStorage.setItem(CART_KEY, JSON.stringify(items));
+    localStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
   } catch (err) {
     // ignore
   }
@@ -54,6 +61,8 @@ function addCartItem(items: CartItem[], product: Product, quantity: number): Car
 
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
   switch (action.type) {
+    case "set":
+      return action.payload.items;
     case "add":
       return addCartItem(state, action.payload.product, action.payload.quantity);
     case "remove":
@@ -75,11 +84,51 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
   const [items, dispatch] = useReducer(cartReducer, [], readFromStorage);
+  const isInitializing = useRef(true);
 
   useEffect(() => {
+    let ignore = false;
+
+    const loadCart = async () => {
+      if (!user) {
+        dispatch({ type: "set", payload: { items: readFromStorage() } });
+        isInitializing.current = false;
+        return;
+      }
+
+      try {
+        const userCart = await getUserCart(user.uid);
+        if (!ignore) {
+          dispatch({ type: "set", payload: { items: userCart } });
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!ignore) {
+          isInitializing.current = false;
+        }
+      }
+    };
+
+    void loadCart();
+
+    return () => {
+      ignore = true;
+    };
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (user && !loading && !isInitializing.current) {
+      void syncUserCart(user.uid, items).catch((error) => {
+        console.error("Error sincronizando carrito:", error);
+      });
+      return;
+    }
+
     writeToStorage(items);
-  }, [items]);
+  }, [items, user?.uid, loading]);
 
   const addItem = (product: Product, quantity = 1) => {
     dispatch({ type: "add", payload: { product, quantity } });

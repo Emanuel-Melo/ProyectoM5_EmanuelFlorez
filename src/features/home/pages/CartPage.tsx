@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../cart/context/CartContext";
 import { useAuth } from "../../auth/hooks/useAuth";
+import { createOrder } from "../../orders/services/orderService";
 import "./HomePage.css";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
@@ -31,16 +32,35 @@ export default function CartPage() {
   const totalAfterDiscount = total - discountAmount;
 
   const handleCheckout = async () => {
+    if (!user) {
+      alert("Debes iniciar sesión para finalizar tu compra.");
+      navigate("/login");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simular llamada a API / trámites de pago
-      await new Promise((res) => setTimeout(res, 1000));
+      const orderPayload = {
+        userId: user.uid,
+        items,
+        total,
+        discount: discountAmount,
+        shipping: "Gratis",
+        status: "pending" as const,
+      };
+
+      await createOrder(orderPayload);
+
       if (firstPurchaseDiscount > 0) {
         localStorage.setItem(customerDiscountKey, "true");
       }
+
       alert("Compra completada correctamente. Gracias por su compra.");
       clear();
       navigate("/home");
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo completar la compra. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
