@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../cart/context/CartContext";
+import { useFavorites } from "../../favorites/context/FavoritesContext";
 
 import type { Product } from "../types/product.types";
 
@@ -16,8 +17,10 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
   const [addedMessage, setAddedMessage] = useState("");
+  const favorite = isFavorite(product.id);
 
   const handleAdd = () => {
     if (isAdding) return;
@@ -58,12 +61,22 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="product-card-footer">
           <strong>{currencyFormatter.format(product.price)}</strong>
           <div className="product-card-actions">
-            <button className="button" type="button" onClick={handleAdd} disabled={isAdding}>
+            <button
+              className="button"
+              type="button"
+              onClick={handleAdd}
+              disabled={isAdding}
+            >
               {isAdding ? "Añadiendo..." : "Añadir al carrito"}
             </button>
-            <Link className="button button-secondary" to={`/products/${product.id}`}>
-              Ver detalle
-            </Link>
+            <button
+              type="button"
+              className={`button button-secondary ${favorite ? "favorite-active" : ""}`}
+              onClick={() => toggleFavorite(product)}
+              aria-label={favorite ? "Eliminar de favoritos" : "Agregar a favoritos"}
+            >
+              {favorite ? "❤️" : "🩶"}
+            </button>
           </div>
           {addedMessage ? <p className="add-feedback">{addedMessage}</p> : null}
         </div>

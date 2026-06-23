@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../cart/context/CartContext";
+import { useFavorites } from "../../favorites/context/FavoritesContext";
 import { useProducts } from "../../products/hooks/useProducts";
 import type { Product } from "../../products/types/product.types";
 import "./HomePage.css";
@@ -24,7 +25,7 @@ const categoryLabels: Record<string, string> = {
 
 const categoryStyles = ["red", "blue", "green", "purple", "amber", "cyan"];
 
-function ProductMiniCard({ product }: { product: Product }) {
+function ProductMiniCard({ product, favorite, onToggleFavorite }: { product: Product; favorite: boolean; onToggleFavorite: () => void }) {
   return (
     <article className="home-product-card">
       <Link className="home-product-image" to={`/products/${product.id}`}>
@@ -34,7 +35,14 @@ function ProductMiniCard({ product }: { product: Product }) {
           <span>BUY</span>
         )}
       </Link>
-      <button className="home-favorite-button" type="button" aria-label="Favorito" />
+      <button
+        className={`home-favorite-button ${favorite ? "favorite-selected" : ""}`}
+        type="button"
+        aria-label={favorite ? "Eliminar de favoritos" : "Agregar a favoritos"}
+        onClick={onToggleFavorite}
+      >
+        {favorite ? "❤️" : "🩶"}
+      </button>
       <div className="home-product-content">
         <h3>{product.name}</h3>
         <span>{product.category}</span>
@@ -48,6 +56,7 @@ function ProductMiniCard({ product }: { product: Product }) {
 function HomePage() {
   const { categories, products, loading } = useProducts();
   const { count } = useCart();
+  const { items: favoriteItems, isFavorite, toggleFavorite } = useFavorites();
 
   const visibleProducts = useMemo(() => products.slice(0, 4), [products]);
 
@@ -61,7 +70,7 @@ function HomePage() {
     [categories, products]
   );
 
-  const favorites = products.slice(0, 3);
+  const favorites = favoriteItems.slice(0, 3);
 
   return (
     <main className="shop-home">
@@ -125,7 +134,12 @@ function HomePage() {
             ) : (
               <div className="home-products-row">
                 {visibleProducts.map((product) => (
-                  <ProductMiniCard key={product.id} product={product} />
+                  <ProductMiniCard
+                    key={product.id}
+                    product={product}
+                    favorite={isFavorite(product.id)}
+                    onToggleFavorite={() => toggleFavorite(product)}
+                  />
                 ))}
               </div>
             )}
@@ -203,7 +217,10 @@ function HomePage() {
           </section>
 
           <section className="home-side-card favorites-card">
-            <h2>Mis favoritos</h2>
+            <div className="favorites-side-header">
+              <h2>Mis favoritos</h2>
+              <span>{favoriteItems.length} guardados</span>
+            </div>
             <div className="favorite-list">
               {favorites.map((product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
@@ -215,8 +232,11 @@ function HomePage() {
                   <b aria-hidden="true" />
                 </Link>
               ))}
+              {favorites.length === 0 && (
+                <p className="favorite-empty">Aún no agregas favoritos.</p>
+              )}
             </div>
-            <Link to="/products">Ver todos los favoritos</Link>
+            <Link to="/favorites">Ver todos los favoritos</Link>
           </section>
         </aside>
       </section>

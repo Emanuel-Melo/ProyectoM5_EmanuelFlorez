@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { AuthProvider } from "./AuthProvider";
 import { CartProvider } from "../../features/cart/context/CartContext";
+import { FavoritesProvider } from "../../features/favorites/context/FavoritesContext";
 
 interface Props {
   children: ReactNode;
@@ -10,7 +11,9 @@ interface Props {
 export function AppProviders({ children }: Props) {
   return (
     <AuthProvider>
-      <CartProvider>{children}</CartProvider>
+      <FavoritesProvider>
+        <CartProvider>{children}</CartProvider>
+      </FavoritesProvider>
     </AuthProvider>
   );
 }
