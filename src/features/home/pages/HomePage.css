@@ -620,6 +620,203 @@
   }
 }
 
+.shipping-page .shipping-header-section {
+  margin-bottom: 18px;
+}
+
+.shipping-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.shipping-tabs .tab {
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--buy-white);
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.shipping-tabs .tab.active {
+  background: rgba(31, 182, 255, 0.16);
+  border-color: rgba(31, 182, 255, 0.4);
+}
+
+.shipping-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: end;
+}
+
+.shipping-sort span {
+  color: var(--buy-muted);
+  font-size: 0.82rem;
+}
+
+.shipping-sort select {
+  min-width: 160px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--buy-white);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.shipping-order-list {
+  display: grid;
+  gap: 18px;
+}
+
+.shipping-order-card {
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.18);
+}
+
+.shipping-order-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: center;
+}
+
+.shipping-order-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.shipping-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.shipping-badge.blue {
+  color: var(--buy-blue);
+  background: rgba(31, 182, 255, 0.12);
+}
+
+.shipping-badge.cyan {
+  color: var(--buy-blue);
+  background: rgba(34, 243, 209, 0.12);
+}
+
+.shipping-badge.purple {
+  color: #b976ff;
+  background: rgba(167, 107, 255, 0.12);
+}
+
+.shipping-badge.red {
+  color: var(--buy-red);
+  background: rgba(242, 15, 47, 0.12);
+}
+
+.shipping-order-details p {
+  margin: 8px 0 0;
+  color: var(--buy-muted);
+  line-height: 1.6;
+}
+
+.shipping-order-total {
+  display: grid;
+  gap: 12px;
+  justify-items: end;
+  text-align: right;
+}
+
+.shipping-order-total span {
+  color: var(--buy-muted);
+}
+
+.shipping-order-total strong {
+  font-size: 1.25rem;
+  color: var(--buy-white);
+}
+
+.shipping-progress-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.shipping-progress-step {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shipping-progress-step.active {
+  background: rgba(31, 182, 255, 0.12);
+  border-color: rgba(31, 182, 255, 0.25);
+}
+
+.shipping-progress-step span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--buy-white);
+  font-weight: 900;
+}
+
+.shipping-progress-step.active span {
+  background: linear-gradient(135deg, var(--buy-red), var(--buy-red-dark));
+}
+
+.shipping-progress-step small {
+  color: var(--buy-muted);
+  font-size: 0.75rem;
+}
+
+.shipping-summary-card,
+.shipping-help-card {
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.shipping-summary-card .summary-list {
+  margin-top: 18px;
+}
+
+.shipping-help-card {
+  margin-top: 18px;
+}
+
+@media (max-width: 960px) {
+  .shipping-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .shipping-sort {
+    justify-self: start;
+  }
+}
+
 @media (max-width: 720px) {
   .shop-header {
     grid-template-columns: 1fr;
@@ -631,6 +828,14 @@
 
   .cart-item-actions {
     justify-content: space-between;
+  }
+
+  .shipping-order-main {
+    grid-template-columns: 1fr;
+  }
+
+  .shipping-progress-row {
+    grid-template-columns: 1fr;
   }
 }
 
