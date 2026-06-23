@@ -1,5 +1,7 @@
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 
+import { useCart } from "../../cart/context/CartContext";
 import { useProductDetail } from "../hooks/useProductDetail";
 import "../products.css";
 
@@ -12,6 +14,9 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 function ProductDetailPage() {
   const { productId } = useParams();
   const { error, loading, product } = useProductDetail(productId);
+  const { addItem } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+  const [addedMessage, setAddedMessage] = useState("");
 
   if (loading) {
     return (
@@ -71,9 +76,22 @@ function ProductDetailPage() {
             </div>
           </dl>
 
-          <button className="button" type="button" disabled={product.stock <= 0}>
-            Agregar al carrito
+          <button
+            className="button"
+            type="button"
+            disabled={product.stock <= 0 || isAdding}
+            onClick={() => {
+              if (product.stock <= 0 || isAdding) return;
+              setIsAdding(true);
+              addItem(product, 1);
+              setAddedMessage("Producto agregado al carrito");
+              window.setTimeout(() => setIsAdding(false), 600);
+              window.setTimeout(() => setAddedMessage(""), 1400);
+            }}
+          >
+            {isAdding ? "Añadiendo..." : "Agregar al carrito"}
           </button>
+          {addedMessage ? <p className="add-feedback">{addedMessage}</p> : null}
         </div>
       </section>
     </main>

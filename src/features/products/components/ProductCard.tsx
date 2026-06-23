@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../cart/context/CartContext";
 
@@ -15,8 +16,24 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+  const [addedMessage, setAddedMessage] = useState("");
 
-  const handleAdd = () => addItem(product, 1);
+  const handleAdd = () => {
+    if (isAdding) return;
+    setIsAdding(true);
+    addItem(product, 1);
+    setAddedMessage("Producto agregado al carrito");
+
+    window.setTimeout(() => {
+      setIsAdding(false);
+    }, 600);
+
+    window.setTimeout(() => {
+      setAddedMessage("");
+    }, 1400);
+  };
+
   return (
     <article className="product-card">
       <Link className="product-card-media" to={`/products/${product.id}`}>
@@ -41,13 +58,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="product-card-footer">
           <strong>{currencyFormatter.format(product.price)}</strong>
           <div className="product-card-actions">
-            <button className="button" type="button" onClick={handleAdd}>
-              Añadir al carrito
+            <button className="button" type="button" onClick={handleAdd} disabled={isAdding}>
+              {isAdding ? "Añadiendo..." : "Añadir al carrito"}
             </button>
             <Link className="button button-secondary" to={`/products/${product.id}`}>
               Ver detalle
             </Link>
           </div>
+          {addedMessage ? <p className="add-feedback">{addedMessage}</p> : null}
         </div>
       </div>
     </article>

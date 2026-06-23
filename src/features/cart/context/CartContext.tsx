@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useReducer } from "react";
 import type { ReactNode } from "react";
 import type { Product } from "../../products/types/product.types";
 
@@ -12,6 +12,12 @@ type CartContextValue = {
   updateQuantity: (productId: string, quantity: number) => void;
   clear: () => void;
 };
+
+type CartAction =
+  | { type: "add"; payload: { product: Product; quantity: number } }
+  | { type: "remove"; payload: { productId: string } }
+  | { type: "updateQuantity"; payload: { productId: string; quantity: number } }
+  | { type: "clear" };
 
 const CART_KEY = "cart_items_v1";
 
@@ -35,43 +41,63 @@ function writeToStorage(items: CartItem[]) {
   }
 }
 
+function addCartItem(items: CartItem[], product: Product, quantity: number): CartItem[] {
+  const index = items.findIndex((item) => item.id === product.id);
+  if (index >= 0) {
+    return items.map((item, idx) =>
+      idx === index ? { ...item, quantity: item.quantity + quantity } : item
+    );
+  }
+
+  return [...items, { ...product, quantity }];
+}
+
+function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
+  switch (action.type) {
+    case "add":
+      return addCartItem(state, action.payload.product, action.payload.quantity);
+    case "remove":
+      return state.filter((item) => item.id !== action.payload.productId);
+    case "updateQuantity": {
+      const { productId, quantity } = action.payload;
+      if (quantity <= 0) {
+        return state.filter((item) => item.id !== productId);
+      }
+      return state.map((item) =>
+        item.id === productId ? { ...item, quantity } : item
+      );
+    }
+    case "clear":
+      return [];
+    default:
+      return state;
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => readFromStorage());
+  const [items, dispatch] = useReducer(cartReducer, [], readFromStorage);
 
   useEffect(() => {
     writeToStorage(items);
   }, [items]);
 
   const addItem = (product: Product, quantity = 1) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((p) => p.id === product.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], quantity: next[idx].quantity + quantity };
-        return next;
-      }
-      return [...prev, { ...product, quantity }];
-    });
+    dispatch({ type: "add", payload: { product, quantity } });
   };
 
   const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((p) => p.id !== productId));
+    dispatch({ type: "remove", payload: { productId } });
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    setItems((prev) => {
-      if (quantity <= 0) {
-        return prev.filter((p) => p.id !== productId);
-      }
-      return prev.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      );
-    });
+    dispatch({ type: "updateQuantity", payload: { productId, quantity } });
   };
 
-  const clear = () => setItems([]);
+  const clear = () => {
+    dispatch({ type: "clear" });
+  };
 
-  const count = items.reduce((s, it) => s + (it.quantity || 0), 0);
+  const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <CartContext.Provider

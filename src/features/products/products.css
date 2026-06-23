@@ -241,6 +241,17 @@
   gap: 12px;
 }
 
+.add-feedback {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(31, 182, 255, 0.14);
+  border: 1px solid rgba(31, 182, 255, 0.28);
+  color: var(--buy-blue);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .product-card-footer strong,
 .product-detail-price {
   color: var(--buy-white);
