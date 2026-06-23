@@ -23,26 +23,23 @@ const statusLabels: Record<string, string> = {
 };
 
 function AdminPage() {
+  const navigate = useNavigate();
   const { user, role } = useAuth();
   const [selectedTab, setSelectedTab] = useState("dashboard");
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
-  const [users, setUsers] = useState<AdminUserSummary[]>([]);
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const loadAdminData = async () => {
       setLoading(true);
       try {
-        const [dashboardStats, userList, recentOrders] = await Promise.all([
+        const [dashboardStats, recentOrders] = await Promise.all([
           adminService.fetchDashboardStats(),
-          adminService.fetchUsers(),
           adminService.fetchRecentOrders(),
         ]);
 
         setStats(dashboardStats);
-        setUsers(userList);
         setOrders(recentOrders);
       } catch (error) {
         console.error(error);
@@ -54,21 +51,9 @@ function AdminPage() {
     void loadAdminData();
   }, []);
 
-  const canManageUsers = role === "admin";
-
-  const handleRoleChange = async (uid: string, newRole: "admin" | "customer") => {
-    if (!canManageUsers) return;
-
-    setActionLoading(true);
-    try {
-      await adminService.updateUserRole(uid, newRole);
-      setUsers((prev) => prev.map((item) => (item.uid === uid ? { ...item, role: newRole } : item)));
-    } catch (error) {
-      console.error(error);
-      alert("No se pudo actualizar el rol del usuario.");
-    } finally {
-      setActionLoading(false);
-    }
+  const handleLogout = async () => {
+    await authService.logout();
+    navigate("/login", { replace: true });
   };
 
   const userCount = stats?.totalUsers ?? 0;
@@ -120,52 +105,6 @@ function AdminPage() {
       );
     }
 
-    if (selectedTab === "users") {
-      return (
-        <section className="admin-panel-section">
-          <div className="admin-section-header">
-            <h2>Usuarios</h2>
-            <p>Designa administradores desde el panel de control.</p>
-          </div>
-          <div className="admin-table-wrapper">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Correo</th>
-                  <th>Rol</th>
-                  <th>Creado</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((userItem) => (
-                  <tr key={userItem.uid}>
-                    <td>{userItem.email}</td>
-                    <td>{userItem.role}</td>
-                    <td>{new Date(
-                      typeof userItem.createdAt === "object" && userItem.createdAt !== null && "seconds" in userItem.createdAt
-                        ? (userItem.createdAt as { seconds: number }).seconds * 1000
-                        : Date.now()
-                    ).toLocaleDateString()}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="button button-secondary"
-                        disabled={!canManageUsers || actionLoading || userItem.role === "admin"}
-                        onClick={() => handleRoleChange(userItem.uid, "admin")}
-                      >
-                        Hacer admin
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      );
-    }
-
     if (selectedTab === "orders") {
       return (
         <section className="admin-panel-section">
@@ -210,7 +149,7 @@ function AdminPage() {
         </div>
       </section>
     );
-  }, [loading, orders, selectedTab, stats, users, canManageUsers, actionLoading]);
+  }, [loading, orders, selectedTab, stats]);
 
   return (
     <main className="admin-shell">
@@ -236,13 +175,21 @@ function AdminPage() {
       <section className="admin-content">
         <header className="admin-header">
           <div>
+            <div className="admin-header-badge">
+              <span>Modo administrador</span>
+            </div>
             <p className="eyebrow">Panel administrativo</p>
             <h1>Bienvenido, {user?.email ?? "Administrador"}</h1>
-            <p className="admin-subtitle">Gestiona el estado de la tienda y la administración de usuarios en un solo lugar.</p>
+            <p className="admin-subtitle">Gestiona el estado de la tienda y supervisa operaciones clave.</p>
           </div>
-          <div className="admin-status-card">
-            <span>Rol actual</span>
-            <strong>{role}</strong>
+          <div className="admin-header-actions">
+            <div className="admin-status-card">
+              <span>Rol actual</span>
+              <strong>{role}</strong>
+            </div>
+            <button type="button" className="admin-button admin-button-logout" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
           </div>
         </header>
 

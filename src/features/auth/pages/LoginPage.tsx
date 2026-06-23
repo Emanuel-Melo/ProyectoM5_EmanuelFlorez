@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BrandMark } from "../../../shared/components/BrandMark";
 import { LoginForm } from "../components/LoginForm";
 import { authService, getAuthErrorMessage } from "../services/authService";
+import { userService } from "../services/userService";
 import "../auth.css";
 
 function LoginPage() {
@@ -17,9 +18,15 @@ function LoginPage() {
       setErrorMessage("");
       setLoading(true);
 
-      await authService.login(email, password);
+      const userCredential = await authService.login(email, password);
+      const uid = userCredential.user.uid;
+      const profile = await userService.getUserProfile(uid);
 
-      navigate("/home", { replace: true });
+      if (profile?.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
     } catch (error) {
       console.error(error);
       setErrorMessage(getAuthErrorMessage(error));
@@ -33,9 +40,15 @@ function LoginPage() {
       setErrorMessage("");
       setLoading(true);
 
-      await authService.loginWithGoogle();
+      const userCredential = await authService.loginWithGoogle();
+      const uid = userCredential.user.uid;
+      const profile = await userService.getUserProfile(uid);
 
-      navigate("/home", { replace: true });
+      if (profile?.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
     } catch (error) {
       console.error(error);
       setErrorMessage(getAuthErrorMessage(error));
