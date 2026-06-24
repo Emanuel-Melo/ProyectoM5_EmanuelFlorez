@@ -656,13 +656,57 @@ https://tu-proyecto.vercel.app
 - [x] Verificación de token ID en backend
 - [x] Control de roles (ProtectedRoute, AdminRoute)
 - [x] Presigned URLs con expiración
+- [x] **Firestore Security Rules** - Control granular de acceso por usuario/rol
+
+### 🔥 Firestore Security Rules
+
+Se incluye archivo `firestore.rules` con políticas de seguridad backend:
+
+```
+// PRODUCTOS - Lectura pública, escritura solo admin
+match /products/{productId} {
+  allow read: if true;
+  allow create, update, delete: if isAdmin();
+}
+
+// USUARIOS - Cada usuario lee su perfil, admin lee todos
+match /users/{userId} {
+  allow read: if isOwner(userId) || isAdmin();
+  allow write: if isOwner(userId);
+}
+
+// ÓRDENES - Usuario ve sus órdenes, admin ve todas
+match /orders/{orderId} {
+  allow read: if isOwner(resource.data.userId) || isAdmin();
+  allow create: if isAuthenticated();
+  allow update: if isAdmin();
+}
+```
+
+**Desplegando en Vercel/Firebase**:
+
+```bash
+# 1. Instalar Firebase CLI (si no lo tienes)
+npm install -g firebase-tools
+
+# 2. Loguea en Firebase
+firebase login
+
+# 3. Inicializa Firebase en el proyecto (si no lo hiciste)
+firebase init firestore
+
+# 4. Despliega las reglas
+firebase deploy --only firestore:rules
+```
+
+**Qué protege**:
+- ✅ Usuarios NO pueden leer órdenes de otros
+- ✅ Usuarios NO pueden escribir en el perfil de otros
+- ✅ Solo admin puede crear/actualizar productos
+- ✅ Stock y datos sensibles protegidos
 
 ### ⏳ Próximo implementar
 
-- [ ] Firestore Security Rules (firestore.rules)
-  - Usuarios solo leen sus órdenes
-  - Admin puede leer/actualizar todas
-  - Productos: lectura pública, escritura solo admin
 - [ ] HTTPS en todas las conexiones (Vercel lo maneja)
 - [ ] Rate limiting en /api/create-order
 - [ ] Logging de operaciones sensibles

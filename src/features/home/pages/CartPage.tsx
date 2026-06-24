@@ -38,6 +38,11 @@ export default function CartPage() {
       return;
     }
 
+    if (items.length === 0) {
+      alert("Tu carrito está vacío. Agrega productos antes de finalizar tu compra.");
+      return;
+    }
+
     setLoading(true);
     try {
       const orderPayload = {
@@ -49,25 +54,35 @@ export default function CartPage() {
         status: "processing" as const,
       };
 
+      console.log("📦 Creando orden:", orderPayload);
       const orderId = await createOrder(orderPayload);
+      console.log("✅ Orden creada con ID:", orderId);
 
+      // Marcar descuento de primera compra como usado
       if (firstPurchaseDiscount > 0) {
         localStorage.setItem(customerDiscountKey, "true");
+        console.log("💰 Descuento de primera compra aplicado y marcado como usado");
       }
 
-      // Clear local cart first so UI updates immediately
+      // Limpiar carrito local ahora que la orden se creó exitosamente
       clear();
+      console.log("🗑️  Carrito vaciado");
 
-      alert("Compra completada correctamente. Gracias por su compra.");
+      // Redirigir a página de orden
+      console.log("🚀 Redirigiendo a /envios/" + orderId);
       navigate(`/envios/${orderId}`);
+      
+      // Mostrar mensaje de éxito después de navegar
+      setTimeout(() => {
+        alert("✅ Compra completada correctamente. ¡Gracias por tu compra! Puedes ver los detalles de tu orden en esta página.");
+      }, 100);
     } catch (error) {
-      console.error(error);
+      console.error("❌ Error durante checkout:", error);
       const message =
         error instanceof Error
           ? error.message
-          : "No se pudo completar la compra. Intenta nuevamente.";
+          : "No se pudo completar la compra. Por favor intenta nuevamente.";
       alert(message);
-    } finally {
       setLoading(false);
     }
   };

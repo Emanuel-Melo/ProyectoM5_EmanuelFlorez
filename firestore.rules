@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========== HELPERS ==========
+    // Verificar si usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Verificar si es el usuario dueño del documento
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Verificar si el usuario es admin
+    function isAdmin() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Verificar si el documento contiene una referencia a una subcamara del usuario actual
+    function isOwnersSubcollection(userId) {
+      return isOwner(userId);
+    }
+
+    // ========== REGLAS PÚBLICAS ==========
+    
+    // PRODUCTOS - Lectura pública, escritura solo admin
+    match /products/{productId} {
+      allow read: if true; // Cualquiera puede leer productos
+      allow create, update, delete: if isAdmin(); // Solo admin puede crear/actualizar/borrar
+    }
+
+    // ========== REGLAS POR USUARIO ==========
+    
+    // USUARIOS - Cada usuario lee su perfil, admin lee todos
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId); // Usuario puede actualizar su propio perfil
+      
+      // CARRITO - Usuario solo accede su carrito
+      match /cart/{cartItem=**} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // FAVORITOS - Usuario solo accede sus favoritos
+      match /favorites/{favoriteId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ========== ÓRDENES ==========
+    
+    // ÓRDENES - Usuario ve sus órdenes, admin ve todas
+    match /orders/{orderId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin(); // Solo admin puede cambiar estado
+      allow delete: if false; // Nunca se pueden borrar órdenes (audit trail)
+    }
+
+    // ========== NOTIFICACIONES (Si se usan) ==========
+    
+    match /notifications/{notificationId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow write: if isAdmin(); // Solo backend/admin crea notificaciones
+    }
+
+    // ========== DENY ALL - Default deny para seguridad ==========
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
