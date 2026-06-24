@@ -14,7 +14,7 @@ function FavoritesPage() {
   };
 
   const moveAllToCart = () => {
-    items.forEach((product) => addItem(product, 1));
+    items.forEach((product: Product) => addItem(product, 1));
     clearFavorites();
   };
 
@@ -50,7 +50,7 @@ function FavoritesPage() {
               </div>
             ) : (
               <div className="favorite-grid">
-                {items.map((product) => (
+                {items.map((product: Product) => (
                   <article className="favorite-card" key={product.id}>
                     <Link className="favorite-card-media" to={`/products/${product.id}`}>
                       <img src={product.imageUrl} alt={product.name} loading="lazy" />

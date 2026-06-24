@@ -222,7 +222,7 @@ function HomePage() {
               <span>{favoriteItems.length} guardados</span>
             </div>
             <div className="favorite-list">
-              {favorites.map((product) => (
+              {favorites.map((product: Product) => (
                 <Link key={product.id} to={`/products/${product.id}`}>
                   <img src={product.imageUrl} alt={product.name} loading="lazy" />
                   <span>

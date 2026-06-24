@@ -1,5 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useRef } from "react";
-import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef, type ReactNode } from "react";
 import type { Product } from "../../products/types/product.types";
 
 import { useAuth } from "../../auth/hooks/useAuth";
