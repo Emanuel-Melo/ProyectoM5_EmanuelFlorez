@@ -5,11 +5,18 @@ import { BrandMark } from "../../../shared/components/BrandMark";
 import { authService } from "../../auth/services/authService";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { adminService } from "../services/adminService";
-import type { AdminDashboardStats, AdminOrderSummary } from "../services/adminService";
+import type {
+  AdminDashboardStats,
+  AdminOrderSummary,
+  AdminProductSummary,
+  AdminUserSummary,
+} from "../services/adminService";
+import type { UserRole } from "../../auth/types/auth.types";
 import "./AdminPage.css";
 
 const navItems = [
   { id: "dashboard", label: "Estadísticas" },
+  { id: "users", label: "Usuarios" },
   { id: "products", label: "Productos" },
   { id: "orders", label: "Pedidos" },
   { id: "shipping", label: "Envíos" },
@@ -27,20 +34,30 @@ function AdminPage() {
   const { user, role } = useAuth();
   const [selectedTab, setSelectedTab] = useState("dashboard");
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
+  const [users, setUsers] = useState<AdminUserSummary[]>([]);
+  const [products, setProducts] = useState<AdminProductSummary[]>([]);
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
+  const [shippingOrders, setShippingOrders] = useState<AdminOrderSummary[]>([]);
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadAdminData = async () => {
       setLoading(true);
       try {
-        const [dashboardStats, recentOrders] = await Promise.all([
+        const [dashboardStats, usersList, productsList, recentOrders, shippingOrdersList] = await Promise.all([
           adminService.fetchDashboardStats(),
+          adminService.fetchUsers(),
+          adminService.fetchProducts(),
           adminService.fetchRecentOrders(),
+          adminService.fetchShippingOrders(),
         ]);
 
         setStats(dashboardStats);
+        setUsers(usersList);
+        setProducts(productsList);
         setOrders(recentOrders);
+        setShippingOrders(shippingOrdersList);
       } catch (error) {
         console.error(error);
       } finally {
@@ -60,6 +77,23 @@ function AdminPage() {
   const adminCount = stats?.totalAdmins ?? 0;
   const productCount = stats?.totalProducts ?? 0;
   const orderCount = stats?.totalOrders ?? 0;
+  const currentAdminUid = user?.uid;
+
+  const handleRoleChange = async (uid: string, role: UserRole) => {
+    setUpdatingUserId(uid);
+    try {
+      await adminService.updateUserRole(uid, role);
+      setUsers((prev) =>
+        prev.map((account) =>
+          account.uid === uid ? { ...account, role } : account
+        )
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
 
   const sectionContent = useMemo(() => {
     if (loading) {
@@ -101,6 +135,135 @@ function AdminPage() {
             <strong>{stats?.statusCounts.delivered ?? 0}</strong>
             <span>Pedidos entregados</span>
           </article>
+        </section>
+      );
+    }
+
+    if (selectedTab === "users") {
+      return (
+        <section className="admin-panel-section">
+          <div className="admin-section-header">
+            <h2>Usuarios</h2>
+            <p>Gestiona el rol de los usuarios registrados en la tienda.</p>
+          </div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Rol</th>
+                  <th>Creado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((account) => {
+                  const isCurrentAdmin = account.uid === currentAdminUid;
+                  const isSaving = updatingUserId === account.uid;
+
+                  return (
+                    <tr key={account.uid}>
+                      <td>{account.email}</td>
+                      <td>
+                        <select
+                          className="admin-role-select"
+                          value={account.role}
+                          disabled={isCurrentAdmin || isSaving}
+                          onChange={(event) =>
+                            handleRoleChange(
+                              account.uid,
+                              event.target.value as UserRole
+                            )
+                          }
+                        >
+                          <option value="customer">Cliente</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                      <td>{String(account.createdAt ?? "-")}</td>
+                      <td>
+                        {isCurrentAdmin
+                          ? "No puede cambiar su rol"
+                          : isSaving
+                          ? "Guardando..."
+                          : "Listo"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      );
+    }
+
+    if (selectedTab === "products") {
+      return (
+        <section className="admin-panel-section">
+          <div className="admin-section-header">
+            <h2>Productos</h2>
+            <p>Revisa el inventario directo desde Firestore.</p>
+          </div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Activo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.id}>
+                    <td>{product.name}</td>
+                    <td>{product.category}</td>
+                    <td>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(product.price)}</td>
+                    <td>{product.stock}</td>
+                    <td>{product.active ? "Sí" : "No"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      );
+    }
+
+    if (selectedTab === "shipping") {
+      return (
+        <section className="admin-panel-section">
+          <div className="admin-section-header">
+            <h2>Envíos</h2>
+            <p>Visualiza los pedidos con información de envío desde Firestore.</p>
+          </div>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Cliente</th>
+                  <th>Envío</th>
+                  <th>Estado</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shippingOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td>{order.id}</td>
+                    <td>{order.userId}</td>
+                    <td>{order.shipping ?? "-"}</td>
+                    <td>{statusLabels[order.status] ?? order.status}</td>
+                    <td>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(order.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       );
     }
@@ -149,7 +312,7 @@ function AdminPage() {
         </div>
       </section>
     );
-  }, [loading, orders, selectedTab, stats]);
+  }, [loading, orders, products, selectedTab, shippingOrders, stats]);
 
   return (
     <main className="admin-shell">
