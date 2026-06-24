@@ -21,11 +21,15 @@ const getDiscountedPrice = (product: Product) => {
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, items: cartItems } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [isAdding, setIsAdding] = useState(false);
   const [addedMessage, setAddedMessage] = useState("");
   const favorite = isFavorite(product.id);
+  const cartItem = cartItems.find((item) => item.id === product.id);
+  const currentQuantity = cartItem?.quantity ?? 0;
+  const stockLimit = Math.min(3, Math.max(0, product.stock));
+  const canAddToCart = product.stock > 0 && currentQuantity < stockLimit;
 
   const handleAdd = () => {
     if (isAdding) return;
@@ -82,7 +86,7 @@ export function ProductCard({ product }: ProductCardProps) {
               className="button"
               type="button"
               onClick={handleAdd}
-              disabled={isAdding}
+              disabled={isAdding || !canAddToCart}
             >
               {isAdding ? "Añadiendo..." : "Añadir al carrito"}
             </button>

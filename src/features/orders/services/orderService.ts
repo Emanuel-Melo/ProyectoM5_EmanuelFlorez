@@ -1,14 +1,5 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
-
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { auth } from "../../../shared/services/firebase/auth";
 import { db } from "../../../shared/services/firebase/firestore";
 import type { CartItem } from "../../cart/context/CartContext";
 
@@ -63,13 +54,50 @@ export type OrderSummary = {
 };
 
 export async function createOrder(order: Omit<OrderRecord, "createdAt">): Promise<string> {
-  const ordersCollection = collection(db, "orders");
-  const orderRef = await addDoc(ordersCollection, {
-    ...order,
-    createdAt: serverTimestamp(),
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new Error("Debes iniciar sesión para crear una orden.");
+  }
+
+  const idToken = await currentUser.getIdToken(true);
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") ?? "";
+  const endpoint = `${apiBaseUrl || ""}/api/create-order`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify(order),
   });
 
-  return orderRef.id;
+  const bodyText = await response.text();
+  let parsedBody: unknown;
+  try {
+    parsedBody = bodyText ? JSON.parse(bodyText) : null;
+  } catch {
+    parsedBody = null;
+  }
+
+  if (!response.ok) {
+    const errorMessage =
+      parsedBody && typeof parsedBody === "object" && parsedBody !== null && "error" in parsedBody
+        ? String((parsedBody as Record<string, unknown>).error)
+        : bodyText || `Error al crear la orden. Código ${response.status}`;
+    throw new Error(errorMessage);
+  }
+
+  if (
+    !parsedBody ||
+    typeof parsedBody !== "object" ||
+    parsedBody === null ||
+    typeof (parsedBody as Record<string, unknown>).orderId !== "string"
+  ) {
+    throw new Error("No se pudo crear la orden.");
+  }
+
+  return String((parsedBody as Record<string, unknown>).orderId);
 }
 
 export async function fetchOrderById(orderId: string): Promise<OrderSummary | null> {

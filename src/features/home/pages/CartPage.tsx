@@ -55,12 +55,18 @@ export default function CartPage() {
         localStorage.setItem(customerDiscountKey, "true");
       }
 
-      alert("Compra completada correctamente. Gracias por su compra.");
+      // Clear local cart first so UI updates immediately
       clear();
+
+      alert("Compra completada correctamente. Gracias por su compra.");
       navigate(`/envios/${orderId}`);
     } catch (error) {
       console.error(error);
-      alert("No se pudo completar la compra. Intenta nuevamente.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo completar la compra. Intenta nuevamente.";
+      alert(message);
     } finally {
       setLoading(false);
     }

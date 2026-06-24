@@ -50,13 +50,27 @@ function writeToStorage(items: CartItem[]) {
 
 function addCartItem(items: CartItem[], product: Product, quantity: number): CartItem[] {
   const index = items.findIndex((item) => item.id === product.id);
+  const maxQuantity = Math.min(3, Math.max(0, product.stock));
+  const desiredQuantity = Math.max(0, quantity);
   if (index >= 0) {
-    return items.map((item, idx) =>
-      idx === index ? { ...item, quantity: item.quantity + quantity } : item
-    );
+    return items.map((item, idx) => {
+      if (idx !== index) return item;
+
+      const newQuantity = Math.min(maxQuantity, item.quantity + desiredQuantity);
+      return item.quantity === newQuantity ? item : { ...item, quantity: newQuantity };
+    });
   }
 
-  return [...items, { ...product, quantity }];
+  if (maxQuantity <= 0) {
+    return items;
+  }
+
+  const finalQuantity = Math.min(maxQuantity, desiredQuantity || 1);
+  if (finalQuantity <= 0) {
+    return items;
+  }
+
+  return [...items, { ...product, quantity: finalQuantity }];
 }
 
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
@@ -73,7 +87,15 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
         return state.filter((item) => item.id !== productId);
       }
       return state.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        item.id === productId
+          ? {
+              ...item,
+              quantity: Math.min(
+                Math.min(3, item.stock),
+                Math.max(1, quantity)
+              ),
+            }
+          : item
       );
     }
     case "clear":

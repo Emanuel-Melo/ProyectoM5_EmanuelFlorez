@@ -29,7 +29,10 @@ function loadDotenv() {
 
 loadDotenv();
 
-const { default: handler } = await import("./api/s3-upload-url.ts");
+const s3UploadModule = await import("./api/s3-upload-url.ts");
+const createOrderModule = await import("./api/create-order.ts");
+const s3UploadHandler = s3UploadModule.default;
+const createOrderHandler = createOrderModule.default;
 
 const port = Number(process.env.DEV_API_PORT ?? "5174");
 
@@ -68,8 +71,35 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         },
       };
 
-      await handler(
+      await s3UploadHandler(
         { method: "POST", body },
+        apiResponse
+      );
+    } catch (error) {
+      res.statusCode = 400;
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }));
+    }
+    return;
+  }
+
+  if (url?.pathname === "/api/create-order" && req.method === "POST") {
+    try {
+      const body = await parseJsonBody(req);
+      const apiResponse = {
+        setHeader: (name: string, value: string) => res.setHeader(name, value),
+        status: (statusCode: number) => {
+          res.statusCode = statusCode;
+          return apiResponse;
+        },
+        json: (payload: unknown) => {
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify(payload));
+        },
+      };
+
+      await createOrderHandler(
+        { method: "POST", body, headers: req.headers },
         apiResponse
       );
     } catch (error) {
