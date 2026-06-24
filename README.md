@@ -11,6 +11,26 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
+## Seed products to Firestore
+
+This project reads products directly from Firestore in the browser, so `products.json` is only needed for initial local seeding.
+
+To upload your local product catalog to Firestore:
+
+1. Create a `.env` file from `.env.example`.
+2. Add your Firebase web config values.
+3. If the JSON file is local and not committed, set `PRODUCTS_FILE` to the path of your file, for example:
+   ```env
+   PRODUCTS_FILE=./products.json
+   ```
+4. Run:
+   ```bash
+   npm run seed
+   ```
+5. After the seed completes successfully, delete `products.json` from the repo and keep it ignored.
+
+The app already fetches products from Firestore via `src/features/products/hooks/useProducts.ts` and `src/features/products/hooks/useProductDetail.ts`.
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:

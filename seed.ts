@@ -64,23 +64,31 @@ const getRequiredEnv = (key: FirebaseEnvKey) => {
   return value;
 };
 
+const getProductsFilePath = () => {
+  const configuredFile = process.env.PRODUCTS_FILE?.trim() || "products.json";
+  return resolve(configuredFile);
+};
+
 const readProducts = () => {
-  const productsPath = resolve("products.json");
+  const productsPath = getProductsFilePath();
 
   if (!existsSync(productsPath)) {
-    throw new Error("No se encontro products.json en la raiz del proyecto.");
+    throw new Error(
+      `No se encontro el archivo de productos en la ruta: ${productsPath}. ` +
+        "Configura PRODUCTS_FILE en .env o coloca products.json en la raiz del proyecto."
+    );
   }
 
   const fileContent = readFileSync(productsPath, "utf8").trim();
 
   if (!fileContent) {
-    throw new Error("products.json esta vacio. Agrega un arreglo de productos.");
+    throw new Error("El archivo de productos esta vacio. Agrega un arreglo de productos.");
   }
 
   const products = JSON.parse(fileContent) as unknown;
 
   if (!Array.isArray(products)) {
-    throw new Error("products.json debe contener un arreglo de productos.");
+    throw new Error("El archivo de productos debe contener un arreglo de productos.");
   }
 
   return products as Product[];

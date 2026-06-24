@@ -9,13 +9,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "seed": "tsx seed.ts"
+    "seed": "tsx seed.ts",
+    "seed:admin": "tsx seed-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",
     "@aws-sdk/s3-request-presigner": "^3.1075.0",
     "@hookform/resolvers": "^5.4.0",
     "firebase": "^12.15.0",
+    "firebase-admin": "^14.0.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.80.0",
