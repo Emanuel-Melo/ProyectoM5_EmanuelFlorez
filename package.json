@@ -8,6 +8,9 @@
     "dev:api": "tsx server.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "preview": "vite preview",
     "seed": "tsx seed.ts",
     "seed:admin": "tsx seed-admin.ts"
@@ -36,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "jsdom": "^23.2.0",
     "prettier": "^3.8.4",
     "tsx": "^4.22.4",
     "typescript": "~6.0.2",
