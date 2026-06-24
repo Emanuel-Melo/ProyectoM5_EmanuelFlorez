@@ -1,4 +1,5 @@
 import {
+  addDoc,
   collection,
   doc,
   getDocs,
@@ -6,6 +7,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  serverTimestamp,
   updateDoc,
   type Unsubscribe,
 } from "firebase/firestore";
@@ -127,6 +129,38 @@ export const adminService = {
     });
   },
 
+  async createProduct(productData: {
+    name: string;
+    description: string;
+    category: string;
+    price: number;
+    stock: number;
+    imageUrl: string;
+    active: boolean;
+  }): Promise<AdminProductSummary> {
+    const productsCollection = collection(db, "products");
+    const newProductRef = await addDoc(productsCollection, {
+      name: String(productData.name),
+      description: String(productData.description),
+      category: String(productData.category),
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      imageUrl: String(productData.imageUrl),
+      active: Boolean(productData.active),
+      createdAt: serverTimestamp(),
+    });
+
+    return {
+      id: newProductRef.id,
+      name: String(productData.name),
+      category: String(productData.category),
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      active: Boolean(productData.active),
+      createdAt: null,
+    };
+  },
+
   async fetchRecentOrders(): Promise<AdminOrderSummary[]> {
     const ordersQuery = query(
       collection(db, "orders"),
@@ -171,13 +205,37 @@ export const adminService = {
     });
   },
 
-  async updateUserRole(uid: string, role: UserRole): Promise<void> {
+  async updateUserRole(
+    uid: string,
+    role: UserRole,
+    performedBy: { uid: string; email: string; targetEmail: string }
+  ): Promise<void> {
     if (!isUserRole(role)) {
       throw new Error("Rol inválido");
     }
 
     const userRef = doc(db, "users", uid);
-    await updateDoc(userRef, { role });
+    const adminRef = doc(db, "users", performedBy.uid);
+
+    const targetMessage =
+      role === "admin"
+        ? `¡Felicidades! Tu rol ha sido actualizado a ADMIN por ${performedBy.email}.`
+        : `Tu rol ha sido actualizado a CLIENTE por ${performedBy.email}.`;
+
+    const adminMessage =
+      role === "admin"
+        ? `Has asignado rol ADMIN al usuario ${performedBy.targetEmail}.`
+        : `Has revertido a CLIENTE al usuario ${performedBy.targetEmail}.`;
+
+    await Promise.all([
+      updateDoc(userRef, {
+        role,
+        pendingNotification: targetMessage,
+      }),
+      updateDoc(adminRef, {
+        pendingNotification: adminMessage,
+      }),
+    ]);
   },
 
   onDashboardStatsChange(

@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 import { db } from "../../../shared/services/firebase/firestore";
 import type { UserProfile, UserRole } from "../types/auth.types";
@@ -24,6 +24,10 @@ export const userService = {
       email: typeof data.email === "string" ? data.email : "",
       role: isUserRole(data.role) ? data.role : "customer",
       createdAt: data.createdAt,
+      pendingNotification:
+        typeof data.pendingNotification === "string"
+          ? data.pendingNotification
+          : null,
     };
   },
 
@@ -39,6 +43,7 @@ export const userService = {
       email: profile.email,
       role: profile.role,
       createdAt: serverTimestamp(),
+      pendingNotification: null,
     });
   },
 
@@ -62,5 +67,19 @@ export const userService = {
     }
 
     return createdProfile;
+  },
+
+  async setPendingNotification(
+    uid: string,
+    message: string | null
+  ): Promise<void> {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, {
+      pendingNotification: message,
+    });
+  },
+
+  async clearPendingNotification(uid: string): Promise<void> {
+    return this.setPendingNotification(uid, null);
   },
 };

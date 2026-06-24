@@ -4,16 +4,29 @@ import logo from "../../assets/images/Logo Buy.png";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useCart } from "../../features/cart/context/CartContext";
 import { authService } from "../../features/auth/services/authService";
+import { userService } from "../../features/auth/services/userService";
 import "../../features/home/pages/HomePage.css";
 
 export function Header() {
-  const { user, role } = useAuth();
+  const { user, role, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
     await authService.logout();
     navigate("/", { replace: true });
+  };
+
+  const handleDismissNotification = async () => {
+    if (!user?.uid) {
+      return;
+    }
+
+    try {
+      await userService.clearPendingNotification(user.uid);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const isActive = (path: string): boolean => {
@@ -60,6 +73,15 @@ export function Header() {
         <span>Buscar</span>
         <input type="search" placeholder="Buscar productos..." />
       </label>
+
+      {profile?.pendingNotification ? (
+        <div className="shop-notification-banner" role="status">
+          <p>{profile.pendingNotification}</p>
+          <button type="button" onClick={handleDismissNotification}>
+            Cerrar
+          </button>
+        </div>
+      ) : null}
 
       <div className="shop-user">
         <Link className="cart-indicator" to="/cart" aria-label="Carrito">

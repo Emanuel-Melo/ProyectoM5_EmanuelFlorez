@@ -29,6 +29,14 @@ const statusLabels: Record<string, string> = {
   delivered: "Entregado",
 };
 
+const productCategories = [
+  "accesorios",
+  "hogar",
+  "electrónica",
+  "ropa",
+  "otros",
+];
+
 function AdminPage() {
   const navigate = useNavigate();
   const { user, role } = useAuth();
@@ -39,6 +47,18 @@ function AdminPage() {
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
   const [shippingOrders, setShippingOrders] = useState<AdminOrderSummary[]>([]);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    description: "",
+    category: productCategories[0],
+    price: "",
+    stock: "",
+    imageUrl: "",
+    active: true,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,19 +99,107 @@ function AdminPage() {
   const orderCount = stats?.totalOrders ?? 0;
   const currentAdminUid = user?.uid;
 
-  const handleRoleChange = async (uid: string, role: UserRole) => {
+  const handleRoleChange = async (
+    uid: string,
+    role: UserRole,
+    targetEmail: string
+  ) => {
     setUpdatingUserId(uid);
+    setStatusMessage(null);
+    setErrorMessage(null);
+
+    if (!user?.uid || !user.email) {
+      setErrorMessage("No se pudo identificar al administrador.");
+      setUpdatingUserId(null);
+      return;
+    }
+
     try {
-      await adminService.updateUserRole(uid, role);
+      await adminService.updateUserRole(uid, role, {
+        uid: user.uid,
+        email: user.email,
+        targetEmail,
+      });
       setUsers((prev) =>
         prev.map((account) =>
           account.uid === uid ? { ...account, role } : account
         )
       );
+      setStatusMessage(
+        `El usuario ${targetEmail} ahora es ${role === "admin" ? "Admin" : "Cliente"}.`
+      );
+      window.setTimeout(() => setStatusMessage(null), 4500);
     } catch (error) {
       console.error(error);
+      setErrorMessage("No se pudo actualizar el rol. Intenta de nuevo.");
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  const handleNewProductChange = (
+    field: keyof typeof newProduct,
+    value: string | boolean
+  ) => {
+    setNewProduct((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleCreateProduct = async () => {
+    setErrorMessage(null);
+    setStatusMessage(null);
+    setIsSavingProduct(true);
+
+    if (!newProduct.name.trim() || !newProduct.description.trim() || !newProduct.imageUrl.trim()) {
+      setErrorMessage("Por favor completa nombre, descripción e imagen.");
+      setIsSavingProduct(false);
+      return;
+    }
+
+    const priceValue = Number(newProduct.price);
+    const stockValue = Number(newProduct.stock);
+
+    if (Number.isNaN(priceValue) || priceValue < 0 || Number.isNaN(stockValue) || stockValue < 0) {
+      setErrorMessage("Precio y stock deben ser valores numéricos válidos.");
+      setIsSavingProduct(false);
+      return;
+    }
+
+    try {
+      const createdProduct = await adminService.createProduct({
+        name: newProduct.name.trim(),
+        description: newProduct.description.trim(),
+        category: newProduct.category,
+        price: priceValue,
+        stock: stockValue,
+        imageUrl: newProduct.imageUrl.trim(),
+        active: Boolean(newProduct.active),
+      });
+
+      setProducts((prev) => [createdProduct, ...prev]);
+      setStatusMessage(`Producto "${createdProduct.name}" creado correctamente.`);
+      setNewProduct({
+        name: "",
+        description: "",
+        category: productCategories[0],
+        price: "",
+        stock: "",
+        imageUrl: "",
+        active: true,
+      });
+      setStats((prev) =>
+        prev
+          ? { ...prev, totalProducts: prev.totalProducts + 1 }
+          : prev
+      );
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("No se pudo crear el producto. Intenta nuevamente.");
+    } finally {
+      setIsSavingProduct(false);
+      window.setTimeout(() => setStatusMessage(null), 4500);
     }
   };
 
@@ -146,6 +254,16 @@ function AdminPage() {
             <h2>Usuarios</h2>
             <p>Gestiona el rol de los usuarios registrados en la tienda.</p>
           </div>
+          {statusMessage || errorMessage ? (
+            <div className="admin-panel-feedback">
+              {statusMessage ? (
+                <div className="admin-feedback success">{statusMessage}</div>
+              ) : null}
+              {errorMessage ? (
+                <div className="admin-feedback error">{errorMessage}</div>
+              ) : null}
+            </div>
+          ) : null}
           <div className="admin-table-wrapper">
             <table className="admin-table">
               <thead>
@@ -172,7 +290,8 @@ function AdminPage() {
                           onChange={(event) =>
                             handleRoleChange(
                               account.uid,
-                              event.target.value as UserRole
+                              event.target.value as UserRole,
+                              account.email
                             )
                           }
                         >
@@ -202,8 +321,102 @@ function AdminPage() {
       return (
         <section className="admin-panel-section">
           <div className="admin-section-header">
-            <h2>Productos</h2>
-            <p>Revisa el inventario directo desde Firestore.</p>
+            <div>
+              <h2>Productos</h2>
+              <p>Revisa el inventario directo desde Firestore.</p>
+            </div>
+            <button
+              type="button"
+              className="admin-button admin-button-secondary"
+              onClick={() => setSelectedTab("products")}
+            >
+              Crear nuevo producto
+            </button>
+          </div>
+          <div className="admin-product-form">
+            <div className="admin-product-grid">
+              <label className="admin-product-field">
+                <span>Nombre</span>
+                <input
+                  type="text"
+                  value={newProduct.name}
+                  onChange={(event) => handleNewProductChange("name", event.target.value)}
+                  placeholder="Zapatos deportivos"
+                />
+              </label>
+              <label className="admin-product-field">
+                <span>Categoría</span>
+                <select
+                  value={newProduct.category}
+                  onChange={(event) => handleNewProductChange("category", event.target.value)}
+                >
+                  {productCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-product-field">
+                <span>Precio</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={newProduct.price}
+                  onChange={(event) => handleNewProductChange("price", event.target.value)}
+                  placeholder="120000"
+                />
+              </label>
+              <label className="admin-product-field">
+                <span>Stock</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={newProduct.stock}
+                  onChange={(event) => handleNewProductChange("stock", event.target.value)}
+                  placeholder="20"
+                />
+              </label>
+              <label className="admin-product-field admin-product-field-full">
+                <span>Imagen URL</span>
+                <input
+                  type="text"
+                  value={newProduct.imageUrl}
+                  onChange={(event) => handleNewProductChange("imageUrl", event.target.value)}
+                  placeholder="https://..."
+                />
+              </label>
+              <label className="admin-product-field admin-product-field-full">
+                <span>Descripción</span>
+                <textarea
+                  value={newProduct.description}
+                  onChange={(event) => handleNewProductChange("description", event.target.value)}
+                  placeholder="Descripción del producto"
+                />
+              </label>
+              <label className="admin-product-field admin-checkbox-field">
+                <input
+                  type="checkbox"
+                  checked={newProduct.active}
+                  onChange={(event) => handleNewProductChange("active", event.target.checked)}
+                />
+                <span>Publicar producto inmediatamente</span>
+              </label>
+            </div>
+            <div className="admin-product-actions">
+              {statusMessage ? <div className="admin-feedback success">{statusMessage}</div> : null}
+              {errorMessage ? <div className="admin-feedback error">{errorMessage}</div> : null}
+              <button
+                type="button"
+                className="admin-button admin-button-primary"
+                onClick={handleCreateProduct}
+                disabled={isSavingProduct}
+              >
+                {isSavingProduct ? "Creando producto..." : "Guardar producto"}
+              </button>
+            </div>
           </div>
           <div className="admin-table-wrapper">
             <table className="admin-table">

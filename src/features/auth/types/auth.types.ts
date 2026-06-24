@@ -7,6 +7,7 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   createdAt?: unknown;
+  pendingNotification?: string | null;
 }
 
 export interface AuthContextType {

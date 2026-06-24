@@ -389,6 +389,130 @@
   outline-offset: 2px;
 }
 
+.admin-button-primary,
+.admin-button-secondary {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.admin-button-primary {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(31, 182, 255, 0.95), rgba(15, 95, 205, 0.95));
+  box-shadow: 0 18px 40px rgba(15, 80, 146, 0.3);
+}
+
+.admin-button-secondary {
+  color: var(--buy-white);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.admin-button-primary:hover,
+.admin-button-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.admin-product-form {
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-product-field {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-product-field-full {
+  grid-column: 1 / -1;
+}
+
+.admin-product-field span {
+  color: var(--buy-white);
+  font-size: 0.95rem;
+}
+
+.admin-product-field input,
+.admin-product-field select,
+.admin-product-field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--buy-white);
+  outline: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.admin-product-field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-product-field input:focus,
+.admin-product-field select:focus,
+.admin-product-field textarea:focus {
+  border-color: rgba(31, 182, 255, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-checkbox-field {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-checkbox-field input {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+}
+
+.admin-product-actions {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-feedback {
+  padding: 16px 18px;
+  border-radius: 18px;
+  font-weight: 700;
+}
+
+.admin-feedback.success {
+  background: rgba(41, 180, 115, 0.12);
+  color: #b8f1cb;
+  border: 1px solid rgba(41, 180, 115, 0.24);
+}
+
+.admin-feedback.error {
+  background: rgba(255, 104, 104, 0.12);
+  color: #ffd1d1;
+  border: 1px solid rgba(255, 104, 104, 0.24);
+}
+
 .admin-status-card strong {
   color: var(--buy-white);
 }
