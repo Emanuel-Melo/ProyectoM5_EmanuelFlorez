@@ -47,6 +47,7 @@ function AdminPage() {
   const [products, setProducts] = useState<AdminProductSummary[]>([]);
   const [orders, setOrders] = useState<AdminOrderSummary[]>([]);
   const [shippingOrders, setShippingOrders] = useState<AdminOrderSummary[]>([]);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -202,7 +203,61 @@ function AdminPage() {
     return newProduct.imageUrl.trim();
   };
 
-  const handleCreateProduct = async () => {
+  const resetProductForm = () => {
+    setEditingProductId(null);
+    setNewProduct({
+      name: "",
+      description: "",
+      category: productCategories[0],
+      price: "",
+      stock: "",
+      imageUrl: "",
+      imageFile: null,
+      active: true,
+    });
+  };
+
+  const handleEditProduct = (product: AdminProductSummary) => {
+    setEditingProductId(product.id);
+    setNewProduct({
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: String(product.price),
+      stock: String(product.stock),
+      imageUrl: product.imageUrl,
+      imageFile: null,
+      active: product.active,
+    });
+    setSelectedTab("products");
+    setStatusMessage(null);
+    setErrorMessage(null);
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    setStatusMessage(null);
+    setErrorMessage(null);
+    setIsSavingProduct(true);
+
+    try {
+      await adminService.deleteProduct(productId);
+      setProducts((prev) => prev.filter((product) => product.id !== productId));
+      setStatusMessage("Producto eliminado correctamente.");
+      setStats((prev) =>
+        prev
+          ? { ...prev, totalProducts: Math.max(prev.totalProducts - 1, 0) }
+          : prev
+      );
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("No se pudo eliminar el producto. Intenta nuevamente.");
+    } finally {
+      setIsSavingProduct(false);
+      window.setTimeout(() => setStatusMessage(null), 4500);
+    }
+  };
+
+  const handleSaveProduct = async () => {
     setErrorMessage(null);
     setStatusMessage(null);
     setIsSavingProduct(true);
@@ -229,7 +284,7 @@ function AdminPage() {
         throw new Error("La imagen no se pudo obtener correctamente.");
       }
 
-      const createdProduct = await adminService.createProduct({
+      const productPayload = {
         name: newProduct.name.trim(),
         description: newProduct.description.trim(),
         category: newProduct.category,
@@ -237,25 +292,28 @@ function AdminPage() {
         stock: stockValue,
         imageUrl: uploadedImageUrl,
         active: Boolean(newProduct.active),
-      });
+      };
 
-      setProducts((prev) => [createdProduct, ...prev]);
-      setStatusMessage(`Producto "${createdProduct.name}" creado correctamente.`);
-      setNewProduct({
-        name: "",
-        description: "",
-        category: productCategories[0],
-        price: "",
-        stock: "",
-        imageUrl: "",
-        imageFile: null,
-        active: true,
-      });
-      setStats((prev) =>
-        prev
-          ? { ...prev, totalProducts: prev.totalProducts + 1 }
-          : prev
-      );
+      if (editingProductId) {
+        const updatedProduct = await adminService.updateProduct(editingProductId, productPayload);
+        setProducts((prev) =>
+          prev.map((product) =>
+            product.id === editingProductId ? updatedProduct : product
+          )
+        );
+        setStatusMessage(`Producto "${updatedProduct.name}" actualizado correctamente.`);
+      } else {
+        const createdProduct = await adminService.createProduct(productPayload);
+        setProducts((prev) => [createdProduct, ...prev]);
+        setStats((prev) =>
+          prev
+            ? { ...prev, totalProducts: prev.totalProducts + 1 }
+            : prev
+        );
+        setStatusMessage(`Producto "${createdProduct.name}" creado correctamente.`);
+      }
+
+      resetProductForm();
     } catch (error) {
       console.error(error);
       const errorMessageText =
@@ -263,8 +321,8 @@ function AdminPage() {
           ? error.message
           : typeof error === "string"
           ? error
-          : "No se pudo crear el producto. Intenta nuevamente.";
-      setErrorMessage(`No se pudo crear el producto. ${errorMessageText}`);
+          : "No se pudo guardar el producto. Intenta nuevamente.";
+      setErrorMessage(`No se pudo guardar el producto. ${errorMessageText}`);
     } finally {
       setIsSavingProduct(false);
       window.setTimeout(() => setStatusMessage(null), 4500);
@@ -507,15 +565,29 @@ function AdminPage() {
               <button
                 type="button"
                 className="admin-button admin-button-primary"
-                onClick={handleCreateProduct}
+                onClick={handleSaveProduct}
                 disabled={isSavingProduct || isUploadingImage}
               >
                 {isUploadingImage
                   ? "Subiendo imagen..."
                   : isSavingProduct
-                  ? "Creando producto..."
+                  ? editingProductId
+                    ? "Actualizando producto..."
+                    : "Guardando producto..."
+                  : editingProductId
+                  ? "Actualizar producto"
                   : "Guardar producto"}
               </button>
+              {editingProductId ? (
+                <button
+                  type="button"
+                  className="admin-button admin-button-secondary"
+                  onClick={resetProductForm}
+                  disabled={isSavingProduct || isUploadingImage}
+                >
+                  Cancelar edición
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="admin-table-wrapper">
@@ -537,6 +609,25 @@ function AdminPage() {
                     <td>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(product.price)}</td>
                     <td>{product.stock}</td>
                     <td>{product.active ? "Sí" : "No"}</td>
+                    <td>
+                      <div className="admin-action-buttons">
+                        <button
+                          type="button"
+                          className="admin-button admin-button-secondary"
+                          onClick={() => handleEditProduct(product)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-button admin-button-danger"
+                          onClick={() => handleDeleteProduct(product.id)}
+                          disabled={isSavingProduct}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

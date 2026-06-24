@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -25,11 +26,23 @@ export type AdminUserSummary = {
 export type AdminProductSummary = {
   id: string;
   name: string;
+  description: string;
   category: string;
   price: number;
   stock: number;
+  imageUrl: string;
   active: boolean;
   createdAt?: unknown;
+};
+
+export type AdminProductPayload = {
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  stock: number;
+  imageUrl: string;
+  active: boolean;
 };
 
 export type AdminOrderSummary = {
@@ -120,24 +133,18 @@ export const adminService = {
       return {
         id: productDoc.id,
         name: String(productData.name ?? "Producto sin nombre"),
+        description: String(productData.description ?? ""),
         category: String(productData.category ?? "otros"),
         price: Number(productData.price ?? 0),
         stock: Number(productData.stock ?? 0),
+        imageUrl: String(productData.imageUrl ?? ""),
         active: productData.active === undefined ? true : Boolean(productData.active),
         createdAt: productData.createdAt,
       };
     });
   },
 
-  async createProduct(productData: {
-    name: string;
-    description: string;
-    category: string;
-    price: number;
-    stock: number;
-    imageUrl: string;
-    active: boolean;
-  }): Promise<AdminProductSummary> {
+  async createProduct(productData: AdminProductPayload): Promise<AdminProductSummary> {
     const productsCollection = collection(db, "products");
     const newProductRef = await addDoc(productsCollection, {
       name: String(productData.name),
@@ -153,12 +160,47 @@ export const adminService = {
     return {
       id: newProductRef.id,
       name: String(productData.name),
+      description: String(productData.description),
       category: String(productData.category),
       price: Number(productData.price),
       stock: Number(productData.stock),
+      imageUrl: String(productData.imageUrl),
       active: Boolean(productData.active),
       createdAt: null,
     };
+  },
+
+  async updateProduct(
+    productId: string,
+    productData: AdminProductPayload
+  ): Promise<AdminProductSummary> {
+    const productRef = doc(db, "products", productId);
+    await updateDoc(productRef, {
+      name: String(productData.name),
+      description: String(productData.description),
+      category: String(productData.category),
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      imageUrl: String(productData.imageUrl),
+      active: Boolean(productData.active),
+    });
+
+    return {
+      id: productId,
+      name: String(productData.name),
+      description: String(productData.description),
+      category: String(productData.category),
+      price: Number(productData.price),
+      stock: Number(productData.stock),
+      imageUrl: String(productData.imageUrl),
+      active: Boolean(productData.active),
+      createdAt: null,
+    };
+  },
+
+  async deleteProduct(productId: string): Promise<void> {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
   },
 
   async fetchRecentOrders(): Promise<AdminOrderSummary[]> {
@@ -301,9 +343,11 @@ export const adminService = {
         return {
           id: productDoc.id,
           name: String(productData.name ?? "Producto sin nombre"),
+          description: String(productData.description ?? ""),
           category: String(productData.category ?? "otros"),
           price: Number(productData.price ?? 0),
           stock: Number(productData.stock ?? 0),
+          imageUrl: String(productData.imageUrl ?? ""),
           active:
             productData.active === undefined ? true : Boolean(productData.active),
           createdAt: productData.createdAt,
@@ -365,9 +409,11 @@ export const adminService = {
         return {
           id: productDoc.id,
           name: String(productData.name ?? "Producto sin nombre"),
+          description: String(productData.description ?? ""),
           category: String(productData.category ?? "otros"),
           price: Number(productData.price ?? 0),
           stock: Number(productData.stock ?? 0),
+          imageUrl: String(productData.imageUrl ?? ""),
           active:
             productData.active === undefined ? true : Boolean(productData.active),
           createdAt: productData.createdAt,
