@@ -31,6 +31,10 @@ function AppRouter() {
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminPage />} />
       </Route>
+      {import.meta.env.DEV ? (
+        // Development helper: render admin page directly for debugging
+        <Route path="/admin-debug" element={<AdminPage />} />
+      ) : null}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />

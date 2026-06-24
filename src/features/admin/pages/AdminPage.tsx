@@ -253,7 +253,13 @@ function AdminPage() {
       );
     } catch (error) {
       console.error(error);
-      setErrorMessage("No se pudo crear el producto. Intenta nuevamente.");
+      const errorMessageText =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+          ? error
+          : "No se pudo crear el producto. Intenta nuevamente.";
+      setErrorMessage(`No se pudo crear el producto. ${errorMessageText}`);
     } finally {
       setIsSavingProduct(false);
       window.setTimeout(() => setStatusMessage(null), 4500);
@@ -340,21 +346,27 @@ function AdminPage() {
                     <tr key={account.uid}>
                       <td>{account.email}</td>
                       <td>
-                        <select
-                          className="admin-role-select"
-                          value={account.role}
-                          disabled={isCurrentAdmin || isSaving}
-                          onChange={(event) =>
-                            handleRoleChange(
-                              account.uid,
-                              event.target.value as UserRole,
-                              account.email
-                            )
-                          }
-                        >
-                          <option value="customer">Cliente</option>
-                          <option value="admin">Admin</option>
-                        </select>
+                        <div className="admin-role-select-wrapper">
+                          <select
+                            className="admin-role-select"
+                            value={account.role}
+                            disabled={isCurrentAdmin || isSaving}
+                            aria-label={`Rol de ${account.email}`}
+                            onChange={(event) =>
+                              handleRoleChange(
+                                account.uid,
+                                event.target.value as UserRole,
+                                account.email
+                              )
+                            }
+                          >
+                            <option value="customer">Cliente</option>
+                            <option value="admin">Administrador</option>
+                          </select>
+                          <span className={`admin-role-badge ${account.role}`}>
+                            {account.role === "admin" ? "Admin" : "Cliente"}
+                          </span>
+                        </div>
                       </td>
                       <td>{String(account.createdAt ?? "-")}</td>
                       <td>
@@ -398,6 +410,7 @@ function AdminPage() {
                   type="text"
                   value={newProduct.name}
                   onChange={(event) => handleNewProductChange("name", event.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   placeholder="Zapatos deportivos"
                 />
               </label>
@@ -406,6 +419,7 @@ function AdminPage() {
                 <select
                   value={newProduct.category}
                   onChange={(event) => handleNewProductChange("category", event.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
                 >
                   {productCategories.map((category) => (
                     <option key={category} value={category}>
@@ -417,24 +431,34 @@ function AdminPage() {
               <label className="admin-product-field">
                 <span>Precio</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={newProduct.price}
-                  onChange={(event) => handleNewProductChange("price", event.target.value)}
+                  onChange={(event) => {
+                    const cleaned = String(event.target.value).replace(/\D+/g, "");
+                    handleNewProductChange("price", cleaned);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
                   placeholder="120000"
                 />
+                <small className="admin-form-hint">Sólo números (sin decimales)</small>
               </label>
               <label className="admin-product-field">
                 <span>Stock</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={newProduct.stock}
-                  onChange={(event) => handleNewProductChange("stock", event.target.value)}
+                  onChange={(event) => {
+                    const cleaned = String(event.target.value).replace(/\D+/g, "");
+                    handleNewProductChange("stock", cleaned);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
                   placeholder="20"
                 />
+                <small className="admin-form-hint">Sólo números (cantidad entera)</small>
               </label>
               <label className="admin-product-field">
                 <span>Imagen</span>
@@ -442,6 +466,7 @@ function AdminPage() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageFileChange}
+                  onMouseDown={(e) => e.stopPropagation()}
                 />
                 <small className="admin-form-hint">Puedes subir un archivo para cargarlo a S3.</small>
               </label>
@@ -451,6 +476,7 @@ function AdminPage() {
                   type="text"
                   value={newProduct.imageUrl}
                   onChange={(event) => handleNewProductChange("imageUrl", event.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   placeholder="https://..."
                 />
               </label>
@@ -465,6 +491,7 @@ function AdminPage() {
                 <textarea
                   value={newProduct.description}
                   onChange={(event) => handleNewProductChange("description", event.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   placeholder="Descripción del producto"
                 />
               </label>
@@ -473,6 +500,7 @@ function AdminPage() {
                   type="checkbox"
                   checked={newProduct.active}
                   onChange={(event) => handleNewProductChange("active", event.target.checked)}
+                  onMouseDown={(e) => e.stopPropagation()}
                 />
                 <span>Publicar producto inmediatamente</span>
               </label>
@@ -601,7 +629,19 @@ function AdminPage() {
         </div>
       </section>
     );
-  }, [loading, orders, products, selectedTab, shippingOrders, stats]);
+  }, [
+    loading,
+    orders,
+    products,
+    selectedTab,
+    shippingOrders,
+    stats,
+    newProduct,
+    statusMessage,
+    errorMessage,
+    isUploadingImage,
+    isSavingProduct,
+  ]);
 
   return (
     <main className="admin-shell">
