@@ -1,60 +1,9 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import "./HomePage.css";
 
-const shippingOrders = [
-  {
-    id: "PB-000124",
-    status: "En camino",
-    statusTone: "blue",
-    date: "20 Mayo 2024",
-    time: "10:30 a.m.",
-    total: 2549.97,
-    items: 3,
-    description: "Pedido entregado en ruta con fecha estimada de llegada",
-    progress: ["Procesando", "En camino", "En entrega", "Entregado"],
-    activeStep: 1,
-    badge: "En camino",
-  },
-  {
-    id: "PB-000123",
-    status: "Procesando",
-    statusTone: "cyan",
-    date: "18 Mayo 2024",
-    time: "02:15 p.m.",
-    total: 249.99,
-    items: 1,
-    description: "Estamos preparando tu pedido para enviarlo pronto.",
-    progress: ["Procesando", "En camino", "En entrega", "Entregado"],
-    activeStep: 0,
-    badge: "Procesando",
-  },
-  {
-    id: "PB-000122",
-    status: "Entregado",
-    statusTone: "purple",
-    date: "15 Mayo 2024",
-    time: "09:45 a.m.",
-    total: 1099.99,
-    items: 1,
-    description: "Pedido entregado correctamente el 17 de Mayo.",
-    progress: ["Procesando", "En camino", "En entrega", "Entregado"],
-    activeStep: 3,
-    badge: "Entregado",
-  },
-  {
-    id: "PB-000121",
-    status: "Cancelado",
-    statusTone: "red",
-    date: "12 Mayo 2024",
-    time: "04:20 p.m.",
-    total: 399.99,
-    items: 1,
-    description: "El pedido fue cancelado y el pago será reembolsado.",
-    progress: ["Procesando", "En camino", "En entrega", "Entregado"],
-    activeStep: 0,
-    badge: "Cancelado",
-  },
-];
+import { useAuth } from "../../auth/hooks/useAuth";
+import { fetchOrdersByUser, type OrderSummary } from "../../orders/services/orderService";
+import "./HomePage.css";
 
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
@@ -62,7 +11,104 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
   maximumFractionDigits: 0,
 });
 
+const orderStatusLabels: Record<string, string> = {
+  pending: "Pendiente",
+  processing: "Procesando",
+  shipped: "En camino",
+  delivered: "Entregado",
+  canceled: "Cancelado",
+};
+
+const orderStatusBadgeClasses: Record<string, string> = {
+  pending: "cyan",
+  processing: "blue",
+  shipped: "purple",
+  delivered: "green",
+  canceled: "red",
+};
+
+const orderProgressSteps = ["Procesando", "En camino", "En entrega", "Entregado"];
+
+const getActiveStep = (status: string) => {
+  switch (status) {
+    case "pending":
+    case "processing":
+      return 0;
+    case "shipped":
+      return 1;
+    case "delivered":
+      return 3;
+    default:
+      return 0;
+  }
+};
+
+type ShippingFilter = "all" | "shipped" | "delivered" | "processing" | "canceled";
+
 function ShippingPage() {
+  const { user } = useAuth();
+  const [filter, setFilter] = useState<ShippingFilter>("all");
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setLoading(false);
+      setOrders([]);
+      return;
+    }
+
+    const loadOrders = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const userOrders = await fetchOrdersByUser(user.uid);
+        setOrders(userOrders);
+      } catch (fetchError) {
+        console.error(fetchError);
+        setError("No se pudieron cargar tus pedidos. Intenta nuevamente más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadOrders();
+  }, [user?.uid]);
+
+  const filteredOrders = useMemo(() => {
+    switch (filter) {
+      case "shipped":
+        return orders.filter((order) => order.status === "shipped");
+      case "delivered":
+        return orders.filter((order) => order.status === "delivered");
+      case "processing":
+        return orders.filter((order) => order.status === "processing");
+      case "canceled":
+        return orders.filter((order) => order.status === "canceled");
+      default:
+        return orders;
+    }
+  }, [filter, orders]);
+
+  const summaryCounts = useMemo(
+    () =>
+      orders.reduce(
+        (summary, order) => {
+          summary[order.status] = (summary[order.status] ?? 0) + 1;
+          return summary;
+        },
+        {
+          pending: 0,
+          processing: 0,
+          shipped: 0,
+          delivered: 0,
+          canceled: 0,
+        } as Record<string, number>
+      ),
+    [orders]
+  );
+
   return (
     <main className="shop-home shipping-page">
       <section className="shop-grid">
@@ -80,11 +126,41 @@ function ShippingPage() {
           </section>
 
           <section className="home-section shipping-tabs">
-            <button type="button" className="tab active">Todos</button>
-            <button type="button" className="tab">En camino</button>
-            <button type="button" className="tab">Entregados</button>
-            <button type="button" className="tab">Procesando</button>
-            <button type="button" className="tab">Cancelados</button>
+            <button
+              type="button"
+              className={`tab ${filter === "all" ? "active" : ""}`}
+              onClick={() => setFilter("all")}
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              className={`tab ${filter === "shipped" ? "active" : ""}`}
+              onClick={() => setFilter("shipped")}
+            >
+              En camino
+            </button>
+            <button
+              type="button"
+              className={`tab ${filter === "delivered" ? "active" : ""}`}
+              onClick={() => setFilter("delivered")}
+            >
+              Entregados
+            </button>
+            <button
+              type="button"
+              className={`tab ${filter === "processing" ? "active" : ""}`}
+              onClick={() => setFilter("processing")}
+            >
+              Procesando
+            </button>
+            <button
+              type="button"
+              className={`tab ${filter === "canceled" ? "active" : ""}`}
+              onClick={() => setFilter("canceled")}
+            >
+              Cancelados
+            </button>
             <div className="shipping-sort">
               <span>Ordenar por:</span>
               <select>
@@ -96,41 +172,64 @@ function ShippingPage() {
           </section>
 
           <section className="home-section shipping-order-list">
-            {shippingOrders.map((order) => (
-              <article className="shipping-order-card" key={order.id}>
-                <div className="shipping-order-main">
-                  <div className="shipping-order-details">
-                    <div className="shipping-order-meta">
-                      <span className={`shipping-badge ${order.statusTone}`}>{order.badge}</span>
-                      <strong>Pedido #{order.id}</strong>
-                    </div>
-                    <p>{order.date} · {order.time}</p>
-                    <p>{order.items} productos</p>
-                    <p>{order.description}</p>
-                  </div>
+            {loading ? (
+              <div className="empty-state">
+                <p>Cargando pedidos...</p>
+              </div>
+            ) : error ? (
+              <div className="empty-state error-state">
+                <p>{error}</p>
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="empty-state">
+                <h2>No se encontraron pedidos para este filtro</h2>
+                <p>Cambia la selección para ver pedidos en otro estado.</p>
+              </div>
+            ) : (
+              filteredOrders.map((order) => {
+                const badgeClass = orderStatusBadgeClasses[order.status] ?? "cyan";
+                const activeStep = getActiveStep(order.status);
+                const itemCount = order.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-                  <div className="shipping-order-total">
-                    <span>Total</span>
-                    <strong>{currencyFormatter.format(order.total)}</strong>
-                    <Link className="button button-secondary" to="/products">
-                      Ver detalles
-                    </Link>
-                  </div>
-                </div>
+                return (
+                  <article className="shipping-order-card" key={order.id}>
+                    <div className="shipping-order-main">
+                      <div className="shipping-order-details">
+                        <div className="shipping-order-meta">
+                          <span className={`shipping-badge ${badgeClass}`}>
+                            {orderStatusLabels[order.status] ?? order.status}
+                          </span>
+                          <strong>Pedido #{order.id}</strong>
+                        </div>
+                        <p>{order.createdAt ? String(order.createdAt) : "Fecha no disponible"}</p>
+                        <p>{itemCount} productos</p>
+                        <p>{order.shipping}</p>
+                      </div>
 
-                <div className="shipping-progress-row">
-                  {order.progress.map((step, index) => (
-                    <div
-                      className={`shipping-progress-step ${index <= order.activeStep ? "active" : ""}`}
-                      key={`${order.id}-${step}`}
-                    >
-                      <span>{index + 1}</span>
-                      <small>{step}</small>
+                      <div className="shipping-order-total">
+                        <span>Total</span>
+                        <strong>{currencyFormatter.format(order.total)}</strong>
+                        <Link className="button button-secondary" to={`/envios/${order.id}`}>
+                          Ver detalles
+                        </Link>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </article>
-            ))}
+
+                    <div className="shipping-progress-row">
+                      {orderProgressSteps.map((step, index) => (
+                        <div
+                          className={`shipping-progress-step ${index === activeStep ? "active" : ""}`}
+                          key={`${order.id}-${step}`}
+                        >
+                          <span>{index + 1}</span>
+                          <small>{step}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                );
+              })
+            )}
           </section>
         </div>
 
@@ -145,32 +244,21 @@ function ShippingPage() {
             <dl className="summary-list">
               <div>
                 <dt>En camino</dt>
-                <dd>2</dd>
+                <dd>{summaryCounts.shipped}</dd>
               </div>
               <div>
                 <dt>Procesando</dt>
-                <dd>1</dd>
+                <dd>{summaryCounts.processing}</dd>
               </div>
               <div>
                 <dt>Entregados</dt>
-                <dd>3</dd>
+                <dd>{summaryCounts.delivered}</dd>
               </div>
               <div>
                 <dt>Cancelados</dt>
-                <dd>1</dd>
+                <dd>{summaryCounts.canceled}</dd>
               </div>
             </dl>
-            <Link className="button button-secondary" to="/contact">
-              Ver historial completo
-            </Link>
-          </section>
-
-          <section className="home-side-card shipping-help-card">
-            <h2>¿Necesitas ayuda?</h2>
-            <p>Si tienes dudas sobre tu envío o tu pedido, estamos listos para ayudarte.</p>
-            <Link className="button button-secondary" to="/contact">
-              Contactar soporte
-            </Link>
           </section>
         </aside>
       </section>

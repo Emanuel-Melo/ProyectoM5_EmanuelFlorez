@@ -10,6 +10,7 @@ import type {
   AdminOrderSummary,
   AdminProductSummary,
   AdminUserSummary,
+  OrderStatus,
 } from "../services/adminService";
 import type { UserRole } from "../../auth/types/auth.types";
 import type { UploadInfo } from "../../../shared/types/s3.types";
@@ -23,12 +24,15 @@ const navItems = [
   { id: "shipping", label: "Envíos" },
 ];
 
-const statusLabels: Record<string, string> = {
+const statusLabels: Record<OrderStatus, string> = {
   pending: "Pendiente",
   processing: "Procesando",
   shipped: "Enviado",
   delivered: "Entregado",
+  canceled: "Cancelado",
 };
+
+const orderStatuses: OrderStatus[] = ["pending", "processing", "shipped", "delivered", "canceled"];
 
 const productCategories = [
   "accesorios",
@@ -53,6 +57,7 @@ function AdminPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
@@ -257,6 +262,57 @@ function AdminPage() {
     }
   };
 
+  const handleOrderStatusChange = async (
+    orderId: string,
+    newStatus: OrderStatus
+  ) => {
+    setUpdatingOrderId(orderId);
+    setStatusMessage(null);
+    setErrorMessage(null);
+
+    const currentOrder = orders.find((order) => order.id === orderId);
+    try {
+      await adminService.updateOrderStatus(orderId, newStatus);
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      setShippingOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+
+      setStats((prev) => {
+        if (!prev || !currentOrder) return prev;
+
+        const statusCounts = { ...prev.statusCounts };
+        if (statusCounts[currentOrder.status] !== undefined) {
+          statusCounts[currentOrder.status] = Math.max(
+            statusCounts[currentOrder.status] - 1,
+            0
+          );
+        }
+        if (statusCounts[newStatus] !== undefined) {
+          statusCounts[newStatus] += 1;
+        }
+
+        return { ...prev, statusCounts };
+      });
+
+      setStatusMessage(`Pedido ${orderId} actualizado a ${statusLabels[newStatus]}.`);
+      window.setTimeout(() => setStatusMessage(null), 4500);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("No se pudo actualizar el estado del pedido. Intenta nuevamente.");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
   const handleSaveProduct = async () => {
     setErrorMessage(null);
     setStatusMessage(null);
@@ -368,6 +424,10 @@ function AdminPage() {
           <article className="dashboard-card stat-card">
             <strong>{stats?.statusCounts.delivered ?? 0}</strong>
             <span>Pedidos entregados</span>
+          </article>
+          <article className="dashboard-card stat-card">
+            <strong>{stats?.statusCounts.canceled ?? 0}</strong>
+            <span>Pedidos cancelados</span>
           </article>
         </section>
       );
@@ -661,7 +721,24 @@ function AdminPage() {
                     <td>{order.id}</td>
                     <td>{order.userId}</td>
                     <td>{order.shipping ?? "-"}</td>
-                    <td>{statusLabels[order.status] ?? order.status}</td>
+                    <td>
+                      <select
+                        value={order.status}
+                        disabled={updatingOrderId === order.id}
+                        onChange={(event) =>
+                          handleOrderStatusChange(
+                            order.id,
+                            event.target.value as OrderStatus
+                          )
+                        }
+                      >
+                        {orderStatuses.map((status) => (
+                          <option key={status} value={status}>
+                            {statusLabels[status]}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     <td>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(order.total)}</td>
                   </tr>
                 ))}
@@ -695,7 +772,24 @@ function AdminPage() {
                     <td>{order.id}</td>
                     <td>{order.userId}</td>
                     <td>{new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(order.total)}</td>
-                    <td>{statusLabels[order.status] ?? order.status}</td>
+                    <td>
+                      <select
+                        value={order.status}
+                        disabled={updatingOrderId === order.id}
+                        onChange={(event) =>
+                          handleOrderStatusChange(
+                            order.id,
+                            event.target.value as OrderStatus
+                          )
+                        }
+                      >
+                        {orderStatuses.map((status) => (
+                          <option key={status} value={status}>
+                            {statusLabels[status]}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -10,6 +10,7 @@ import ProductsPage from "../../features/products/pages/ProductsPage";
 import FavoritesPage from "../../features/home/pages/FavoritesPage";
 import CartPage from "../../features/home/pages/CartPage";
 import ShippingPage from "../../features/home/pages/ShippingPage";
+import OrderDetailPage from "../../features/home/pages/OrderDetailPage";
 import { AdminRoute } from "../../shared/guards/AdminRoute";
 import { ProtectedRoute } from "../../shared/guards/ProtectedRoute";
 import MainLayout from "../../shared/layouts/MainLayout";
@@ -26,6 +27,7 @@ function AppRouter() {
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/envios" element={<ShippingPage />} />
+          <Route path="/envios/:orderId" element={<OrderDetailPage />} />
         </Route>
       </Route>
       <Route element={<AdminRoute />}>

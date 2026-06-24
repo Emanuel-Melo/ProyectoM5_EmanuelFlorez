@@ -45,10 +45,12 @@ export type AdminProductPayload = {
   active: boolean;
 };
 
+export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "canceled";
+
 export type AdminOrderSummary = {
   id: string;
   userId: string;
-  status: string;
+  status: OrderStatus;
   total: number;
   shipping?: string;
   createdAt?: unknown;
@@ -64,11 +66,22 @@ export type AdminDashboardStats = {
     processing: number;
     shipped: number;
     delivered: number;
+    canceled: number;
   };
 };
 
 const isUserRole = (value: unknown): value is UserRole =>
   value === "admin" || value === "customer";
+
+const isOrderStatus = (value: unknown): value is OrderStatus =>
+  value === "pending" ||
+  value === "processing" ||
+  value === "shipped" ||
+  value === "delivered" ||
+  value === "canceled";
+
+const parseOrderStatus = (value: unknown): OrderStatus =>
+  isOrderStatus(value) ? value : "pending";
 
 export const adminService = {
   async fetchDashboardStats(): Promise<AdminDashboardStats> {
@@ -83,6 +96,7 @@ export const adminService = {
       processing: 0,
       shipped: 0,
       delivered: 0,
+      canceled: 0,
     };
 
     ordersSnapshot.docs.forEach((orderDoc) => {
@@ -203,6 +217,13 @@ export const adminService = {
     await deleteDoc(productRef);
   },
 
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
+    const orderRef = doc(db, "orders", orderId);
+    await updateDoc(orderRef, {
+      status: String(status),
+    });
+  },
+
   async fetchRecentOrders(): Promise<AdminOrderSummary[]> {
     const ordersQuery = query(
       collection(db, "orders"),
@@ -217,7 +238,7 @@ export const adminService = {
       return {
         id: orderDoc.id,
         userId: String(orderData.userId ?? ""),
-        status: String(orderData.status ?? "pending"),
+        status: parseOrderStatus(orderData.status),
         total: Number(orderData.total ?? 0),
         shipping: String(orderData.shipping ?? "-"),
         createdAt: orderData.createdAt,
@@ -239,7 +260,7 @@ export const adminService = {
       return {
         id: orderDoc.id,
         userId: String(orderData.userId ?? ""),
-        status: String(orderData.status ?? "pending"),
+        status: parseOrderStatus(orderData.status),
         total: Number(orderData.total ?? 0),
         shipping: String(orderData.shipping ?? "-"),
         createdAt: orderData.createdAt,
@@ -299,6 +320,7 @@ export const adminService = {
           processing: 0,
           shipped: 0,
           delivered: 0,
+          canceled: 0,
         };
 
         ordersSnapshot.forEach((order) => {
@@ -363,7 +385,7 @@ export const adminService = {
         return {
           id: orderDoc.id,
           userId: String(orderData.userId ?? ""),
-          status: String(orderData.status ?? "pending"),
+          status: parseOrderStatus(orderData.status),
           total: Number(orderData.total ?? 0),
           shipping: String(orderData.shipping ?? "-"),
           createdAt: orderData.createdAt,
@@ -437,7 +459,7 @@ export const adminService = {
         return {
           id: orderDoc.id,
           userId: String(orderData.userId ?? ""),
-          status: String(orderData.status ?? "pending"),
+          status: parseOrderStatus(orderData.status),
           total: Number(orderData.total ?? 0),
           shipping: String(orderData.shipping ?? "-"),
           createdAt: orderData.createdAt,
@@ -463,7 +485,7 @@ export const adminService = {
         return {
           id: orderDoc.id,
           userId: String(orderData.userId ?? ""),
-          status: String(orderData.status ?? "pending"),
+          status: parseOrderStatus(orderData.status),
           total: Number(orderData.total ?? 0),
           shipping: String(orderData.shipping ?? "-"),
           createdAt: orderData.createdAt,

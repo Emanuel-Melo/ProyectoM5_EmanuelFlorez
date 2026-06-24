@@ -43,13 +43,13 @@ export default function CartPage() {
       const orderPayload = {
         userId: user.uid,
         items,
-        total,
+        total: totalAfterDiscount,
         discount: discountAmount,
         shipping: "Gratis",
-        status: "pending" as const,
+        status: "processing" as const,
       };
 
-      await createOrder(orderPayload);
+      const orderId = await createOrder(orderPayload);
 
       if (firstPurchaseDiscount > 0) {
         localStorage.setItem(customerDiscountKey, "true");
@@ -57,7 +57,7 @@ export default function CartPage() {
 
       alert("Compra completada correctamente. Gracias por su compra.");
       clear();
-      navigate("/home");
+      navigate(`/envios/${orderId}`);
     } catch (error) {
       console.error(error);
       alert("No se pudo completar la compra. Intenta nuevamente.");
