@@ -49,7 +49,6 @@ export default async function (req: any, res: any) {
     Bucket: bucketName,
     Key: key,
     ContentType: contentType,
-    ACL: "public-read",
   });
 
   try {

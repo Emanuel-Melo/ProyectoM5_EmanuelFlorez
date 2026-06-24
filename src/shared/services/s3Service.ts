@@ -13,16 +13,37 @@ export const s3Config = {
 };
 
 export async function requestS3UploadUrl(fileName: string, contentType: string): Promise<UploadInfo> {
-  const response = await fetch(`${s3Config.apiBaseUrl}/api/s3-upload-url`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ fileName, contentType }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${s3Config.apiBaseUrl}/api/s3-upload-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fileName, contentType }),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`No se pudo obtener la URL de subida a S3. Error de red: ${message}`);
+  }
 
   if (!response.ok) {
-    throw new Error("No se pudo obtener la URL de subida a S3.");
+    const errorText = await response.text();
+    let message = `No se pudo obtener la URL de subida a S3. Código ${response.status} ${response.statusText}.`;
+
+    try {
+      const json = JSON.parse(errorText);
+      if (json?.error) {
+        message += ` ${json.error}`;
+      }
+    } catch {
+      if (errorText.trim()) {
+        message += ` ${errorText.trim()}`;
+      }
+    }
+
+    throw new Error(message);
   }
 
   return response.json();

@@ -171,16 +171,21 @@ function AdminPage() {
           newProduct.imageFile.type || "application/octet-stream"
         );
 
+        console.log("[admin] uploadInfo:", uploadInfo);
         const uploadResponse = await fetch(uploadInfo.uploadUrl, {
           method: "PUT",
+          mode: "cors",
           headers: {
             "Content-Type": newProduct.imageFile.type || "application/octet-stream",
           },
           body: newProduct.imageFile,
         });
 
+        console.log("[admin] S3 PUT status", uploadResponse.status, uploadResponse.statusText);
         if (!uploadResponse.ok) {
-          throw new Error("La carga a S3 falló.");
+          const bodyText = await uploadResponse.text().catch(() => "<no-body>");
+          console.error("[admin] S3 upload failed:", uploadResponse.status, bodyText);
+          throw new Error(`La carga a S3 falló. Código ${uploadResponse.status} ${uploadResponse.statusText}. ${bodyText}`);
         }
 
         setNewProduct((current) => ({
@@ -419,7 +424,7 @@ function AdminPage() {
                 <select
                   value={newProduct.category}
                   onChange={(event) => handleNewProductChange("category", event.target.value)}
-                  onMouseDown={(e) => e.stopPropagation()}
+                  aria-label="Categoría del producto"
                 >
                   {productCategories.map((category) => (
                     <option key={category} value={category}>
@@ -494,15 +499,6 @@ function AdminPage() {
                   onMouseDown={(e) => e.stopPropagation()}
                   placeholder="Descripción del producto"
                 />
-              </label>
-              <label className="admin-product-field admin-checkbox-field">
-                <input
-                  type="checkbox"
-                  checked={newProduct.active}
-                  onChange={(event) => handleNewProductChange("active", event.target.checked)}
-                  onMouseDown={(e) => e.stopPropagation()}
-                />
-                <span>Publicar producto inmediatamente</span>
               </label>
             </div>
             <div className="admin-product-actions">
