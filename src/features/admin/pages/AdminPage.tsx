@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { BrandMark } from "../../../shared/components/BrandMark";
@@ -12,6 +12,7 @@ import type {
   AdminUserSummary,
 } from "../services/adminService";
 import type { UserRole } from "../../auth/types/auth.types";
+import type { UploadInfo } from "../../../shared/types/s3.types";
 import "./AdminPage.css";
 
 const navItems = [
@@ -49,6 +50,7 @@ function AdminPage() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -57,6 +59,7 @@ function AdminPage() {
     price: "",
     stock: "",
     imageUrl: "",
+    imageFile: null as File | null,
     active: true,
   });
   const [loading, setLoading] = useState(true);
@@ -139,7 +142,7 @@ function AdminPage() {
 
   const handleNewProductChange = (
     field: keyof typeof newProduct,
-    value: string | boolean
+    value: string | boolean | File | null
   ) => {
     setNewProduct((current) => ({
       ...current,
@@ -147,12 +150,59 @@ function AdminPage() {
     }));
   };
 
+  const handleImageFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setNewProduct((current) => ({
+      ...current,
+      imageFile: file,
+    }));
+  };
+
+  const uploadProductImage = async (): Promise<string> => {
+    if (newProduct.imageFile) {
+      setIsUploadingImage(true);
+      try {
+        const { requestS3UploadUrl } = await import(
+          "../../../shared/services/s3Service"
+        );
+
+        const uploadInfo: UploadInfo = await requestS3UploadUrl(
+          newProduct.imageFile.name,
+          newProduct.imageFile.type || "application/octet-stream"
+        );
+
+        const uploadResponse = await fetch(uploadInfo.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": newProduct.imageFile.type || "application/octet-stream",
+          },
+          body: newProduct.imageFile,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("La carga a S3 falló.");
+        }
+
+        setNewProduct((current) => ({
+          ...current,
+          imageUrl: uploadInfo.publicUrl,
+        }));
+
+        return uploadInfo.publicUrl;
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
+    return newProduct.imageUrl.trim();
+  };
+
   const handleCreateProduct = async () => {
     setErrorMessage(null);
     setStatusMessage(null);
     setIsSavingProduct(true);
 
-    if (!newProduct.name.trim() || !newProduct.description.trim() || !newProduct.imageUrl.trim()) {
+    if (!newProduct.name.trim() || !newProduct.description.trim() || (!newProduct.imageUrl.trim() && !newProduct.imageFile)) {
       setErrorMessage("Por favor completa nombre, descripción e imagen.");
       setIsSavingProduct(false);
       return;
@@ -168,13 +218,19 @@ function AdminPage() {
     }
 
     try {
+      const uploadedImageUrl = await uploadProductImage();
+
+      if (!uploadedImageUrl) {
+        throw new Error("La imagen no se pudo obtener correctamente.");
+      }
+
       const createdProduct = await adminService.createProduct({
         name: newProduct.name.trim(),
         description: newProduct.description.trim(),
         category: newProduct.category,
         price: priceValue,
         stock: stockValue,
-        imageUrl: newProduct.imageUrl.trim(),
+        imageUrl: uploadedImageUrl,
         active: Boolean(newProduct.active),
       });
 
@@ -187,6 +243,7 @@ function AdminPage() {
         price: "",
         stock: "",
         imageUrl: "",
+        imageFile: null,
         active: true,
       });
       setStats((prev) =>
@@ -379,8 +436,17 @@ function AdminPage() {
                   placeholder="20"
                 />
               </label>
+              <label className="admin-product-field">
+                <span>Imagen</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                />
+                <small className="admin-form-hint">Puedes subir un archivo para cargarlo a S3.</small>
+              </label>
               <label className="admin-product-field admin-product-field-full">
-                <span>Imagen URL</span>
+                <span>URL de imagen</span>
                 <input
                   type="text"
                   value={newProduct.imageUrl}
@@ -388,6 +454,12 @@ function AdminPage() {
                   placeholder="https://..."
                 />
               </label>
+              {newProduct.imageUrl ? (
+                <div className="admin-image-preview admin-product-field admin-product-field-full">
+                  <span>Vista previa</span>
+                  <img src={newProduct.imageUrl} alt="Previsualización" />
+                </div>
+              ) : null}
               <label className="admin-product-field admin-product-field-full">
                 <span>Descripción</span>
                 <textarea
@@ -412,9 +484,13 @@ function AdminPage() {
                 type="button"
                 className="admin-button admin-button-primary"
                 onClick={handleCreateProduct}
-                disabled={isSavingProduct}
+                disabled={isSavingProduct || isUploadingImage}
               >
-                {isSavingProduct ? "Creando producto..." : "Guardar producto"}
+                {isUploadingImage
+                  ? "Subiendo imagen..."
+                  : isSavingProduct
+                  ? "Creando producto..."
+                  : "Guardar producto"}
               </button>
             </div>
           </div>
