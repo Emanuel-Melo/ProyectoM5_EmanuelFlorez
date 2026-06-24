@@ -12,6 +12,22 @@ const getServiceAccountCredential = () => {
   }
 
   if (!existsSync(serviceAccountPath)) {
+    // En desarrollo local sin clave, usar aplicación default (requiere GOOGLE_APPLICATION_CREDENTIALS)
+    // En Vercel/producción, debe estar configurada en variables de ambiente
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ No se encontró serviceAccountKey.json. Intentando usar GOOGLE_APPLICATION_CREDENTIALS...");
+      try {
+        return applicationDefault();
+      } catch (error) {
+        console.error(
+          "❌ Error: Firebase Admin no está configurado.\n" +
+          "   Opción 1: Descarga serviceAccountKey.json desde Firebase Console\n" +
+          "   Opción 2: Define la variable GOOGLE_APPLICATION_CREDENTIALS"
+        );
+        throw error;
+      }
+    }
+    
     throw new Error(
       `No se encontró la clave de servicio de Firebase Admin en ${serviceAccountPath}. ` +
         "Define GOOGLE_APPLICATION_CREDENTIALS o SERVICE_ACCOUNT_KEY_PATH."
@@ -29,6 +45,7 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
+db.settings({ ignoreUndefinedProperties: true });
 
 const jsonResponse = (res: any, status: number, payload: unknown) => {
   res.status(status);
@@ -128,7 +145,7 @@ export default async function createOrderHandler(req: { method: string; body: un
         const discountPercent = typeof data.discountPercent === "number" ? data.discountPercent : 0;
         const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price;
 
-        orderItems.push({
+        const itemData: any = {
           id: product.id,
           name: String(data.name ?? "Producto"),
           description: String(data.description ?? ""),
@@ -138,8 +155,14 @@ export default async function createOrderHandler(req: { method: string; body: un
           imageUrl: String(data.imageUrl ?? ""),
           active: Boolean(data.active ?? true),
           quantity: product.quantity,
-          discountPercent: discountPercent > 0 ? discountPercent : undefined,
-        });
+        };
+
+        // Solo agregar discountPercent si es mayor a 0
+        if (discountPercent > 0) {
+          itemData.discountPercent = discountPercent;
+        }
+
+        orderItems.push(itemData);
 
         subtotal += discountedPrice * product.quantity;
       }
