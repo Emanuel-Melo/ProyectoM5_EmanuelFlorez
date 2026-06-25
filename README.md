@@ -28,12 +28,12 @@ Una **Single Page Application (SPA)** moderna que permite a usuarios finales com
 
 ### **Por qué Context API + useReducer en lugar de Redux/Zustand?**
 
-| Criterio | Context + useReducer | Redux | Zustand |
-|----------|----------------------|-------|---------|
-| **Bundle size** | ~1KB | ~10KB | ~3KB |
-| **Curva aprendizaje** | Baja (API nativa) | Alta | Media |
-| **Para este proyecto** | ✅ Ideal | Overkill | Alternativa válida |
-| **Escalabilidad** | +++ (contexts separados) | ++++ | +++ |
+| Criterio               | Context + useReducer     | Redux    | Zustand            |
+|------------------------|--------------------------|----------|--------------------|
+| **Bundle size**        | ~1KB                     | ~10KB    | ~3KB               |
+| **Curva aprendizaje**  | Baja (API nativa)        | Alta     | Media              |
+| **Para este proyecto** | Ideal                    | Overkill | Alternativa válida |
+| **Escalabilidad**      | +++ (contexts separados) | ++++     | +++                |
 
 **Decisión**: Usamos **Context + useReducer** porque:
 - No requiere dependencias adicionales
@@ -43,7 +43,7 @@ Una **Single Page Application (SPA)** moderna que permite a usuarios finales com
 
 ### **Por qué Presigned URLs en lugar de subir desde backend?**
 
-**Arquitectura actual (Segura ✅)**:
+**Arquitectura actual (Segura)**:
 ```
 Frontend → Vercel Function → Genera URL firmada → S3
          ↓
@@ -51,25 +51,25 @@ Frontend → Vercel Function → Genera URL firmada → S3
 ```
 
 **Ventajas**:
-- ✅ Credenciales de AWS nunca llegan al navegador
-- ✅ URL tiene expiración (default 15 min)
-- ✅ No satura el backend con uploads binarios
-- ✅ Escalable: S3 maneja la carga
+- Credenciales de AWS nunca llegan al navegador
+- URL tiene expiración (default 15 min)
+- No satura el backend con uploads binarios
+- Escalable: S3 maneja la carga
 
 **Por qué NO subir desde backend**:
-- ❌ Satura servidor con datos binarios
-- ❌ Latencia adicional (datos viajan 2x)
-- ❌ Menos escalable
+- Satura servidor con datos binarios
+- Latencia adicional (datos viajan 2x)
+- Menos escalable
 
 ### **Por qué Firebase Admin solo en backend?**
 
 ```
-Frontend ❌ No puede: 
+Frontend No puede: 
   - Crear órdenes sin que cualquiera lo haga
   - Decrementar stock sin validación
   - Acceder a datos privados
 
-Backend ✅ Puede:
+Backend Puede:
   - Verificar token ID
   - Validar stock en transacción
   - Crear orden atomically
@@ -83,33 +83,33 @@ Backend ✅ Puede:
 ```
 ProyectoM5_EmanuelFlorez/
 │
-├── 📄 README.md                    # Este archivo
-├── 📄 AI-USAGE-LOG.md              # Bitácora de uso de IA (Decisiones clave)
-├── 📄 package.json                 # Dependencias y scripts
-├── 📄 vite.config.ts               # Config Vite + proxy API
-├── 📄 vercel.json                  # Config despliegue Vercel
-├── 📄 tsconfig.json                # Configuración TypeScript
-├── 📄 .env.example                 # Template variables entorno
+├── README.md                    # Este archivo
+├── AI-USAGE-LOG.md              # Bitácora de uso de IA (Decisiones clave)
+├── package.json                 # Dependencias y scripts
+├── vite.config.ts               # Config Vite + proxy API
+├── vercel.json                  # Config despliegue Vercel
+├── tsconfig.json                # Configuración TypeScript
+├── .env.example                 # Template variables entorno
 │
-├── 🔧 api/                         # Backend serverless (Vercel Functions)
+├── api/                         # Backend serverless (Vercel Functions)
 │   ├── create-order.ts             # Endpoint: crear orden (Firebase Admin)
 │   └── s3-upload-url.ts            # Endpoint: generar URLs presignadas
 │
-├── 📦 server.ts                    # Servidor local dev (dev:api)
+├── server.ts                    # Servidor local dev (dev:api)
 │
-├── 🌾 src/
+├── src/
 │   │
-│   ├── 🎨 assets/                  # Imágenes y recursos
+│   ├── assets/                  # Imágenes y recursos
 │   │   ├── images/
 │   │   └── loading/
 │   │
-│   ├── 🏗️ app/                     # Configuración global
+│   ├── app/                     # Configuración global
 │   │   ├── providers/              # AuthProvider, AppProviders
 │   │   └── router/                 # AppRouter (todas las rutas)
 │   │
-│   ├── ✨ features/                # Lógica de negocio por feature
+│   ├── features/                # Lógica de negocio por feature
 │   │   │
-│   │   ├── 🔐 auth/                # Autenticación
+│   │   ├── auth/                # Autenticación
 │   │   │   ├── context/            # AuthContext (usuario + rol)
 │   │   │   ├── hooks/              # useAuth hook
 │   │   │   ├── pages/              # LoginPage, RegisterPage
@@ -119,14 +119,14 @@ ProyectoM5_EmanuelFlorez/
 │   │   │   ├── schemas/            # Zod schemas validación
 │   │   │   └── index.js            # Exports
 │   │   │
-│   │   ├── 🛒 cart/                # Carrito de compras
+│   │   ├── cart/                # Carrito de compras
 │   │   │   ├── context/            # CartContext (estado + sync)
 │   │   │   └── services/           # cartService (Firestore)
 │   │   │
-│   │   ├── ❤️ favorites/           # Favoritos
+│   │   ├── favorites/           # Favoritos
 │   │   │   └── context/            # FavoritesContext
 │   │   │
-│   │   ├── 📦 products/            # Catálogo de productos
+│   │   ├── products/            # Catálogo de productos
 │   │   │   ├── pages/              # ProductsPage, ProductDetailPage
 │   │   │   ├── components/         # ProductGrid, ProductFilters, SearchBar
 │   │   │   ├── hooks/              # useProducts, useProductDetail
@@ -134,20 +134,20 @@ ProyectoM5_EmanuelFlorez/
 │   │   │   ├── services/           # productService
 │   │   │   └── products.css
 │   │   │
-│   │   ├── 📋 orders/              # Gestión de órdenes
+│   │   ├── orders/              # Gestión de órdenes
 │   │   │   ├── services/           # orderService (crear, leer órdenes)
 │   │   │   └── types/              # order.types
 │   │   │
-│   │   ├── 🏠 home/                # Experiencia del cliente
+│   │   ├── home/                # Experiencia del cliente
 │   │   │   ├── pages/              # HomePage, CartPage, ShippingPage, OrderDetailPage
 │   │   │   └── components/         # Componentes específicos home
 │   │   │
-│   │   └── 👨‍💼 admin/                # Panel de administración
+│   │   └── admin/                # Panel de administración
 │   │       ├── pages/              # AdminPage (dashboard completo)
 │   │       ├── services/           # adminService (CRUD + stats)
 │   │       └── AdminPage.css
 │   │
-│   ├── 🎯 shared/                  # Código compartido
+│   ├── shared/                  # Código compartido
 │   │   ├── components/             # Header, BrandMark, LoadingScreen
 │   │   ├── guards/                 # ProtectedRoute, AdminRoute
 │   │   ├── hooks/                  # Custom hooks compartidos
@@ -161,7 +161,7 @@ ProyectoM5_EmanuelFlorez/
 │   │   └── styles/
 │   │       └── global.css
 │   │
-│   ├── 🧪 tests/                   # Test suite (próximo: agregar tests)
+│   ├── tests/                   # Test suite (próximo: agregar tests)
 │   │
 │   ├── 📄 App.tsx                  # Root component
 │   ├── 📄 main.tsx                 # Entry point
