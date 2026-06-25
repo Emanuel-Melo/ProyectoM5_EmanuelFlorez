@@ -5,37 +5,40 @@ import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { FieldValue, getFirestore, type Transaction } from "firebase-admin/firestore";
 
 const getServiceAccountCredential = () => {
-  const serviceAccountPath = process.env.SERVICE_ACCOUNT_KEY_PATH?.trim() || "serviceAccountKey.json";
+  // Producción (Vercel): usar variables de entorno
+  if (
+    process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_PRIVATE_KEY
+  ) {
+    return cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    });
+  }
 
+  // Si existe GOOGLE_APPLICATION_CREDENTIALS
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim()) {
     return applicationDefault();
   }
 
-  if (!existsSync(serviceAccountPath)) {
-    // En desarrollo local sin clave, usar aplicación default (requiere GOOGLE_APPLICATION_CREDENTIALS)
-    // En Vercel/producción, debe estar configurada en variables de ambiente
-    if (process.env.NODE_ENV === "development") {
-      console.warn("⚠️ No se encontró serviceAccountKey.json. Intentando usar GOOGLE_APPLICATION_CREDENTIALS...");
-      try {
-        return applicationDefault();
-      } catch (error) {
-        console.error(
-          "❌ Error: Firebase Admin no está configurado.\n" +
-          "   Opción 1: Descarga serviceAccountKey.json desde Firebase Console\n" +
-          "   Opción 2: Define la variable GOOGLE_APPLICATION_CREDENTIALS"
-        );
-        throw error;
-      }
-    }
-    
-    throw new Error(
-      `No se encontró la clave de servicio de Firebase Admin en ${serviceAccountPath}. ` +
-        "Define GOOGLE_APPLICATION_CREDENTIALS o SERVICE_ACCOUNT_KEY_PATH."
+  // Desarrollo local: usar serviceAccountKey.json
+  const serviceAccountPath =
+    process.env.SERVICE_ACCOUNT_KEY_PATH?.trim() ||
+    "serviceAccountKey.json";
+
+  if (existsSync(serviceAccountPath)) {
+    const serviceAccount = JSON.parse(
+      readFileSync(resolve(serviceAccountPath), "utf8")
     );
+
+    return cert(serviceAccount);
   }
 
-  const serviceAccount = JSON.parse(readFileSync(resolve(serviceAccountPath), "utf8"));
-  return cert(serviceAccount);
+  throw new Error(
+    "Firebase Admin no está configurado. Configura FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL y FIREBASE_PRIVATE_KEY en producción o usa serviceAccountKey.json en desarrollo."
+  );
 };
 
 if (!getApps().length) {
