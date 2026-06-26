@@ -36,7 +36,7 @@ export const RegisterForm = ({
   };
 
   return (
-    <form className="form-stack" onSubmit={handleSubmit(submitRegister)}>
+    <form className="form-stack" onSubmit={handleSubmit(submitRegister)}> // ejeccuta validaciones, si estan correctas ejecuta la funcion submitRegister
       <div className="field">
         <label htmlFor="register-email">Correo</label>
         <input

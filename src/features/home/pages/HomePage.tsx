@@ -5,13 +5,13 @@ import { useFavorites } from "../../favorites/context/FavoritesContext";
 import { useProducts } from "../../products/hooks/useProducts";
 import type { Product } from "../../products/types/product.types";
 import "./HomePage.css";
-
+// Esta función sirve para formatear los precios en pesos colombianos sin decimales.
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   currency: "COP",
   maximumFractionDigits: 0,
   style: "currency",
 });
-
+// Esta función sirve para calcular el precio con descuento de un artículo, si tiene un porcentaje de descuento, redondeando el resultado al entero más cercano. Si no tiene descuento, devuelve el precio original.
 const categoryLabels: Record<string, string> = {
   accessories: "Accesorios",
   audio: "Audio",
@@ -24,7 +24,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryStyles = ["red", "blue", "green", "purple", "amber", "cyan"];
-
+// Esta función sirve para formatear los precios en pesos colombianos sin decimales.
 function ProductMiniCard({ product, favorite, onToggleFavorite }: { product: Product; favorite: boolean; onToggleFavorite: () => void }) {
   return (
     <article className="home-product-card">
@@ -52,7 +52,7 @@ function ProductMiniCard({ product, favorite, onToggleFavorite }: { product: Pro
     </article>
   );
 }
-
+// Devuelve la representación visual de la página de inicio, mostrando secciones de categorías populares, productos destacados, beneficios y un resumen de pedidos y favoritos. Permite al usuario explorar productos, ver detalles y gestionar favoritos.
 function HomePage() {
   const { categories, products, loading } = useProducts();
   const { count } = useCart();

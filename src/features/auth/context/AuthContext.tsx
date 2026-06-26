@@ -27,6 +27,8 @@ export function AuthProvider({ children }: Props) {
     let isActive = true;
     let unsubscribeProfile: (() => void) | null = null;
 
+
+    // onAuthStateChanged es un listener que se ejecuta cada vez que el usuario cambia de estado (login, logout, etc)
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       setUser(firebaseUser);
@@ -41,6 +43,8 @@ export function AuthProvider({ children }: Props) {
         return;
       }
 
+
+      // Si el usuario esta logueado, se asegura de que exista un perfil de usuario en Firestore y se suscribe a los cambios en el documento del perfil del usuario
       try {
         const email = firebaseUser.email ?? "";
         await userService.ensureUserProfile(firebaseUser.uid, email);
@@ -93,6 +97,8 @@ export function AuthProvider({ children }: Props) {
       }
     });
 
+
+// sirve para limpiar los listeners cuando el componente se desmonta, evitando memory leaks
     return () => {
       isActive = false;
       unsubscribe();
@@ -102,6 +108,7 @@ export function AuthProvider({ children }: Props) {
     };
   }, []);
 
+  // sirve para proveer el contexto de autenticacion a los componentes hijos, incluyendo el usuario logueado, su perfil y el estado de carga
   return (
     <AuthContext.Provider
       value={{

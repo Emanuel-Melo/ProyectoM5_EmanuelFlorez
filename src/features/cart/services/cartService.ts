@@ -2,12 +2,12 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 import { db } from "../../../shared/services/firebase/firestore";
 import type { CartItem } from "../context/CartContext";
-
+// Difine un tipo CartPayloadItem que representa un elemento del carrito de compras en la base de datos, incluyendo el id del producto y la cantidad.
 type CartPayloadItem = {
   id: string;
   quantity: number;
 };
-
+// Define una función mapCartItem que toma un id de producto, una cantidad y un objeto de datos, y devuelve un objeto CartItem con los campos correspondientes.
 function mapCartItem(id: string, quantity: number, data: Record<string, unknown>): CartItem {
   return {
     id,
@@ -21,7 +21,7 @@ function mapCartItem(id: string, quantity: number, data: Record<string, unknown>
     quantity,
   };
 }
-
+// Define una función getUserCart que toma un uid de usuario y devuelve una promesa que resuelve a un arreglo de CartItem. La función obtiene los datos del carrito del usuario desde la base de datos y los mapea a objetos CartItem.
 export async function getUserCart(uid: string): Promise<CartItem[]> {
   const userRef = doc(db, "users", uid);
   const userSnap = await getDoc(userRef);
@@ -32,7 +32,7 @@ export async function getUserCart(uid: string): Promise<CartItem[]> {
 
   const data = userSnap.data();
   const cartPayload = Array.isArray(data.cart) ? (data.cart as CartPayloadItem[]) : [];
-
+// Mapear los elementos del carrito a objetos CartItem, filtrando aquellos que no tienen un id o cantidad válidos, y obteniendo los datos del producto desde la base de datos.
   const hydratedItems = await Promise.all(
     cartPayload.map(async (item) => {
       if (typeof item?.id !== "string" || typeof item?.quantity !== "number") {
@@ -52,14 +52,14 @@ export async function getUserCart(uid: string): Promise<CartItem[]> {
 
   return hydratedItems.filter((item): item is CartItem => item !== null);
 }
-
+// Define una función syncUserCart que toma un uid de usuario y un arreglo de CartItem, y sincroniza el carrito del usuario en la base de datos. La función actualiza o crea el documento del usuario con los elementos del carrito.
 export async function syncUserCart(uid: string, cart: CartItem[]): Promise<void> {
   const userRef = doc(db, "users", uid);
   const payload: CartPayloadItem[] = cart.map((item) => ({
     id: item.id,
     quantity: item.quantity,
   }));
-
+// Obtener el documento del usuario y actualizarlo o crearlo según corresponda, estableciendo el campo "cart" con el payload de elementos del carrito.
   const userSnap = await getDoc(userRef);
   if (userSnap.exists()) {
     await updateDoc(userRef, { cart: payload });

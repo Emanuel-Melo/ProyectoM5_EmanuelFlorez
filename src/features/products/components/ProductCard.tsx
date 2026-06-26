@@ -19,7 +19,7 @@ const getDiscountedPrice = (product: Product) => {
   if (!product.discountPercent) return product.price;
   return Math.round(product.price * (1 - product.discountPercent / 100));
 };
-
+// Devuelve la representación visual de la tarjeta de producto, mostrando información sobre el producto, su precio, stock y acciones para agregar al carrito o marcar como favorito. Maneja casos de stock limitado y muestra mensajes de retroalimentación al usuario cuando se agrega un producto al carrito.
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem, items: cartItems } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
     window.setTimeout(() => {
       setIsAdding(false);
     }, 600);
-
+// Muestra un mensaje de retroalimentación al usuario indicando que el producto ha sido agregado al carrito. El mensaje se muestra durante 1.4 segundos antes de desaparecer.
     window.setTimeout(() => {
       setAddedMessage("");
     }, 1400);

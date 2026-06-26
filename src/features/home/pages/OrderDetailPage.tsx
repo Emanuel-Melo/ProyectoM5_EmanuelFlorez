@@ -20,7 +20,7 @@ const orderStatusLabels: Record<string, string> = {
 };
 
 const orderProgressSteps = ["Procesando", "En camino", "En entrega", "Entregado"];
-
+// Esta función sirve para determinar el paso activo en la barra de progreso del pedido según su estado. Devuelve un índice que representa el paso actual: 0 para "pending" o "processing", 1 para "shipped", 3 para "delivered", y 0 por defecto para cualquier otro estado.
 const getActiveStep = (status: string) => {
   switch (status) {
     case "pending":
@@ -34,7 +34,7 @@ const getActiveStep = (status: string) => {
       return 0;
   }
 };
-
+// Devuelve la representación visual de la página de detalle del pedido, mostrando información sobre el estado del pedido, los productos incluidos y el total. Permite al usuario ver el progreso del envío y regresar a la lista de envíos. Maneja casos de carga, errores y permisos de acceso según el usuario autenticado.
 function OrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ function OrderDetailPage() {
 
     void loadOrder();
   }, [orderId, user?.uid]);
-
+//si el usuario no ha iniciado sesión, muestra un mensaje indicando que debe iniciar sesión para ver los detalles del pedido.
   if (!user) {
     return (
       <main className="shop-home shipping-page">
@@ -107,7 +107,7 @@ function OrderDetailPage() {
           <button className="button" type="button" onClick={() => navigate("/envios")}>Volver a envíos</button>
         </div>
       </section>
-
+// Muestra diferentes estados de la página según si está cargando, si hay un error, si no se encuentra el pedido o si se ha cargado correctamente. Si se ha cargado correctamente, muestra los detalles del pedido, incluyendo el estado, la fecha, la cantidad de productos, el envío y el total. También muestra una barra de progreso del envío y una lista de los productos incluidos en el pedido.
       {loading ? (
         <section className="empty-state">
           <p>Cargando pedido...</p>

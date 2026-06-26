@@ -28,7 +28,7 @@ const orderStatusBadgeClasses: Record<string, string> = {
 };
 
 const orderProgressSteps = ["Procesando", "En camino", "En entrega", "Entregado"];
-
+// Esta función sirve para determinar el paso activo en la barra de progreso del pedido según su estado. Devuelve un índice que representa el paso actual: 0 para "pending" o "processing", 1 para "shipped", 3 para "delivered", y 0 por defecto para cualquier otro estado.
 const getActiveStep = (status: string) => {
   switch (status) {
     case "pending":
@@ -44,14 +44,14 @@ const getActiveStep = (status: string) => {
 };
 
 type ShippingFilter = "all" | "shipped" | "delivered" | "processing" | "canceled";
-
+// Devuelve la representación visual de la página de envíos, mostrando una lista de pedidos del usuario autenticado. Permite filtrar los pedidos por estado y muestra un resumen de los mismos. Maneja casos de carga, errores y permisos de acceso según el usuario autenticado.
 function ShippingPage() {
   const { user } = useAuth();
   const [filter, setFilter] = useState<ShippingFilter>("all");
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+// Si el usuario no ha iniciado sesión, muestra un mensaje indicando que debe iniciar sesión para ver sus pedidos.
   useEffect(() => {
     if (!user?.uid) {
       setLoading(false);
@@ -75,7 +75,7 @@ function ShippingPage() {
 
     void loadOrders();
   }, [user?.uid]);
-
+// Filtra los pedidos según el estado seleccionado por el usuario. Si no hay pedidos que coincidan con el filtro, muestra un mensaje indicando que no se encontraron pedidos para ese filtro.
   const filteredOrders = useMemo(() => {
     switch (filter) {
       case "shipped":
@@ -108,7 +108,7 @@ function ShippingPage() {
       ),
     [orders]
   );
-
+// Si el usuario no ha iniciado sesión, muestra un mensaje indicando que debe iniciar sesión para ver sus pedidos.
   return (
     <main className="shop-home shipping-page">
       <section className="shop-grid">

@@ -4,8 +4,8 @@ import { applicationDefault, cert, getApps, initializeApp } from "firebase-admin
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { FieldValue, getFirestore, type Transaction } from "firebase-admin/firestore";
 
+// Esta función es para buscar credenciales de Firebase Admin en diferentes entornos (producción, desarrollo local, etc.)
 const getServiceAccountCredential = () => {
-  // Producción (Vercel): usar variables de entorno
   if (
     process.env.FIREBASE_PROJECT_ID &&
     process.env.FIREBASE_CLIENT_EMAIL &&
@@ -41,12 +41,14 @@ const getServiceAccountCredential = () => {
   );
 };
 
+//Reutiliza procesos de vercel para evitar inicializar la app de Firebase Admin más de una vez
 if (!getApps().length) {
   initializeApp({
     credential: getServiceAccountCredential(),
   });
 }
 
+//Evita errores cuando un campo es undefined
 const db = getFirestore();
 db.settings({ ignoreUndefinedProperties: true });
 
@@ -59,7 +61,7 @@ const jsonResponse = (res: any, status: number, payload: unknown) => {
 export default async function createOrderHandler(req: { method: string; body: unknown; headers?: Record<string, string | string[] | undefined> }, res: any) {
   if (req.method !== "POST") {
     return jsonResponse(res, 405, { error: "Método no permitido" });
-  }
+  } //Solo acepta valores POST porque crar una orden es una acción que modifica el estado del servidor y no debería ser accesible mediante GET u otros métodos.
 
   const authHeader = req.headers?.authorization;
   const bearerToken = typeof authHeader === "string" ? authHeader.split(" ") : [];
@@ -74,7 +76,7 @@ export default async function createOrderHandler(req: { method: string; body: un
     decodedToken = await getAuth().verifyIdToken(idToken);
   } catch (error) {
     return jsonResponse(res, 401, { error: "Token inválido." });
-  }
+  }// Verifica que el token sea válido y decodifícalo para obtener información del usuario, lo que colabora como una seguridad más robusta
 
   const body = req.body as Record<string, unknown>;
   const userId = typeof body.userId === "string" ? body.userId : null;
@@ -118,6 +120,7 @@ export default async function createOrderHandler(req: { method: string; body: un
     const orderRef = db.collection("orders").doc();
     const userRef = db.doc(`users/${userId}`);
 
+//Esta función soluciona el problema de doble pedido simultaneo ya que válida hasta que solo una orden gane
     await db.runTransaction(async (transaction: Transaction) => {
       const productSnaps = await Promise.all(productRefs.map((product) => transaction.get(product.ref)));
       const userSnap = await transaction.get(userRef);
@@ -146,7 +149,7 @@ export default async function createOrderHandler(req: { method: string; body: un
 
         const price = Number(data.price ?? 0);
         const discountPercent = typeof data.discountPercent === "number" ? data.discountPercent : 0;
-        const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price;
+        const discountedPrice = discountPercent > 0 ? Math.round(price * (1 - discountPercent / 100)) : price; //Adicional calcula descuentos segun precio, busca datos directamente de firestore
 
         const itemData: any = {
           id: product.id,
@@ -180,6 +183,7 @@ export default async function createOrderHandler(req: { method: string; body: un
           createdAt: FieldValue.serverTimestamp(),
       }
 
+//Aquí evita vaciar carrito si ocurre error en la transacción
       transaction.set(orderRef, orderPayload);
       transaction.update(userRef, { cart: [] });
     });

@@ -70,6 +70,8 @@ function AdminPage() {
   });
   const [loading, setLoading] = useState(true);
 
+
+  //Se ejecuta al montar el componente, carga datos del panel de administración y actualiza el estado de los datos solo una vez
   useEffect(() => {
     const loadAdminData = async () => {
       setLoading(true);
@@ -313,6 +315,8 @@ function AdminPage() {
     }
   };
 
+
+  // Maneja la lógica de guardar un producto, ya sea creando uno nuevo o actualizando uno existente
   const handleSaveProduct = async () => {
     setErrorMessage(null);
     setStatusMessage(null);
@@ -385,6 +389,8 @@ function AdminPage() {
     }
   };
 
+
+  //Sirve para renderizar unicamente la seccion seleccionada
   const sectionContent = useMemo(() => {
     if (loading) {
       return <p className="admin-loading">Cargando datos...</p>;

@@ -9,7 +9,7 @@ type ProductFiltersProps = {
 
 const formatCategory = (category: string) =>
   category.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-
+// Devuelve la representación visual de los filtros de productos, permitiendo al usuario filtrar por categoría, rango de precios y disponibilidad en stock. Incluye un botón para limpiar los filtros aplicados.
 export function ProductFilters({
   categories,
   filters,

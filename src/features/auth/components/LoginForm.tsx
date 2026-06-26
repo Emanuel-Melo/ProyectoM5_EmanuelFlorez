@@ -13,6 +13,8 @@ interface LoginFormProps {
   onGoogleLogin: () => Promise<void>;
 }
 
+
+//sirve para renderizar el formulario de login, con validaciones y manejo de errores
 export const LoginForm = ({
   errorMessage,
   loading,

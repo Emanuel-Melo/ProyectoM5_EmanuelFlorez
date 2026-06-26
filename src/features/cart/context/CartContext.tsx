@@ -9,7 +9,7 @@ import {
 } from "../services/cartService";
 
 export type CartItem = Product & { quantity: number };
-
+// Define un tipo CartContextValue que representa el valor del contexto del carrito de compras, incluyendo los elementos del carrito (items), la cantidad total de elementos (count) y funciones para agregar, eliminar, actualizar la cantidad y limpiar el carrito.
 type CartContextValue = {
   items: CartItem[];
   count: number;
@@ -29,7 +29,7 @@ type CartAction =
 const GUEST_CART_KEY = "guest_cart_items_v1";
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
-
+// Define una función readFromStorage que lee los elementos del carrito de compras desde el almacenamiento local (localStorage) y devuelve un arreglo de CartItem. Si no hay elementos almacenados o ocurre un error, devuelve un arreglo vacío.
 function readFromStorage(): CartItem[] {
   try {
     const raw = localStorage.getItem(GUEST_CART_KEY);
@@ -47,7 +47,7 @@ function writeToStorage(items: CartItem[]) {
     // ignore
   }
 }
-
+// Define una función addCartItem que agrega un producto al carrito de compras. Si el producto ya existe en el carrito, actualiza la cantidad, asegurándose de que no exceda el stock disponible ni la cantidad máxima permitida (3). Si el producto no existe, lo agrega al carrito con la cantidad deseada.
 function addCartItem(items: CartItem[], product: Product, quantity: number): CartItem[] {
   const index = items.findIndex((item) => item.id === product.id);
   const maxQuantity = Math.min(3, Math.max(0, product.stock));
@@ -72,7 +72,7 @@ function addCartItem(items: CartItem[], product: Product, quantity: number): Car
 
   return [...items, { ...product, quantity: finalQuantity }];
 }
-
+// Define una función cartReducer que maneja las acciones del carrito de compras, como establecer los elementos, agregar un producto, eliminar un producto, actualizar la cantidad y limpiar el carrito. Devuelve el nuevo estado del carrito según la acción realizada.
 function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
   switch (action.type) {
     case "set":
@@ -104,7 +104,7 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
       return state;
   }
 }
-
+// Define un componente CartProvider que proporciona el contexto del carrito de compras a sus componentes hijos. Utiliza useReducer para manejar el estado del carrito y sincroniza los elementos del carrito con el almacenamiento local y la base de datos según el usuario autenticado.
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const [items, dispatch] = useReducer(cartReducer, [], readFromStorage);
@@ -140,7 +140,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ignore = true;
     };
   }, [user?.uid]);
-
+// Define un efecto que sincroniza los elementos del carrito con la base de datos si el usuario está autenticado y no está en estado de carga. Si el usuario no está autenticado, guarda los elementos del carrito en el almacenamiento local.
   useEffect(() => {
     if (user && !loading && !isInitializing.current) {
       void syncUserCart(user.uid, items).catch((error) => {
@@ -169,7 +169,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
-
+// Define el valor del contexto del carrito de compras, incluyendo los elementos del carrito, la cantidad total de elementos y las funciones para agregar, eliminar, actualizar la cantidad y limpiar el carrito.
   return (
     <CartContext.Provider
       value={{ items, addItem, removeItem, updateQuantity, clear, count }}
@@ -178,7 +178,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     </CartContext.Provider>
   );
 }
-
+// Define un hook useCart que permite acceder al contexto del carrito de compras desde cualquier componente hijo del CartProvider. Lanza un error si se utiliza fuera del CartProvider.
 export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used within CartProvider");

@@ -12,17 +12,17 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
+// sirve para manejar el inicio de sesión del usuario con correo electrónico y contraseña, y redirigirlo a la página correspondiente según su rol
   const handleLogin = async (email: string, password: string) => {
     try {
       setErrorMessage("");
       setLoading(true);
-
+// llama al servicio de autenticación para iniciar sesión con correo electrónico y contraseña, obtiene el perfil del usuario y redirige según su rol
       const userCredential = await authService.login(email, password);
       const uid = userCredential.user.uid;
       const profile = await userService.getUserProfile(uid);
 
-      if (profile?.role === "admin") {
+      if (profile?.role === "admin") { // si el rol del usuario es "admin", redirige a la página de administración
         navigate("/admin", { replace: true });
       } else {
         navigate("/home", { replace: true });
@@ -34,7 +34,7 @@ function LoginPage() {
       setLoading(false);
     }
   };
-
+// sirve para manejar el inicio de sesión del usuario con Google, y redirigirlo a la página correspondiente según su rol
   const handleGoogleLogin = async () => {
     try {
       setErrorMessage("");
@@ -56,7 +56,7 @@ function LoginPage() {
       setLoading(false);
     }
   };
-
+//devuelve el JSX que representa la página de inicio de sesión, incluyendo el formulario de inicio de sesión y enlaces para registrarse o volver al inicio
   return (
     <main className="app-shell">
       <section className="auth-card">

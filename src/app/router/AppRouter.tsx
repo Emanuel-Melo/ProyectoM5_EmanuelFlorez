@@ -18,10 +18,10 @@ import MainLayout from "../../shared/layouts/MainLayout";
 function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route element={<ProtectedRoute />}>
+      <Route path="/" element={<LandingPage />} /> //ayuda a que la landing page sea la primera en renderizarse al entrar a la app
+      <Route element={<ProtectedRoute />}> //Protege las rutas que requieren autenticación, redirigiendo a la página de inicio de sesión si el usuario no está autenticado
         <Route element={<MainLayout />}>
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/home" element={<HomePage />} /> //Se entra solo si se esta logueado, de lo contrario redirige a login
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />

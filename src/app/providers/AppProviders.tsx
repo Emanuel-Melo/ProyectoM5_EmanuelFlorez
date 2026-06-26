@@ -1,3 +1,4 @@
+//Este archivo sirve para tener codigo limpio de main, ayuda a escalabilidad
 import type { ReactNode } from "react";
 
 import { AuthProvider } from "./AuthProvider";

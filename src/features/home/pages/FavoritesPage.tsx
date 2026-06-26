@@ -7,17 +7,17 @@ import "./HomePage.css";
 function FavoritesPage() {
   const { items, removeFavorite, clearFavorites } = useFavorites();
   const { addItem } = useCart();
-
+// Devuelve la representación visual de la página de favoritos, mostrando los productos guardados por el usuario. Permite al usuario mover productos al carrito, eliminar productos de favoritos y limpiar todos los favoritos. Si no hay favoritos, muestra un mensaje indicando que no hay productos guardados.
   const moveToCart = (product: Product) => {
     addItem(product, 1);
     removeFavorite(product.id);
   };
-
+// Mueve todos los productos favoritos al carrito y limpia la lista de favoritos.
   const moveAllToCart = () => {
     items.forEach((product: Product) => addItem(product, 1));
     clearFavorites();
   };
-
+// Devuelve la representación visual de la página de favoritos, mostrando los productos guardados por el usuario. Permite al usuario mover productos al carrito, eliminar productos de favoritos y limpiar todos los favoritos. Si no hay favoritos, muestra un mensaje indicando que no hay productos guardados.
   return (
     <main className="shop-home favorites-page">
       <section className="shop-grid">

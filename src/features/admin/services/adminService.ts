@@ -83,6 +83,8 @@ const isOrderStatus = (value: unknown): value is OrderStatus =>
 const parseOrderStatus = (value: unknown): OrderStatus =>
   isOrderStatus(value) ? value : "pending";
 
+
+//Obtiene datos como usuarios, productos, pedidos, todos simultaneamente y los devuelve en un objeto con las estadísticas del panel de administración
 export const adminService = {
   async fetchDashboardStats(): Promise<AdminDashboardStats> {
     const [usersSnapshot, productsSnapshot, ordersSnapshot] = await Promise.all([
@@ -121,6 +123,8 @@ export const adminService = {
     };
   },
 
+
+  //Obtiene todos los usuarios de la base de datos y los devuelve en un array de objetos con la información resumida de cada usuario
   async fetchUsers(): Promise<AdminUserSummary[]> {
     const usersSnapshot = await getDocs(collection(db, "users"));
 
@@ -138,6 +142,9 @@ export const adminService = {
       .sort((first, second) => first.email.localeCompare(second.email));
   },
 
+
+
+  //Esta funcion es para traer los productos de la base de datos y leerlos
   async fetchProducts(): Promise<AdminProductSummary[]> {
     const productsSnapshot = await getDocs(collection(db, "products"));
 
@@ -158,6 +165,8 @@ export const adminService = {
     });
   },
 
+
+  //Esta funcion es para crear productos nuevos en base de datos
   async createProduct(productData: AdminProductPayload): Promise<AdminProductSummary> {
     const productsCollection = collection(db, "products");
     const newProductRef = await addDoc(productsCollection, {
@@ -184,6 +193,9 @@ export const adminService = {
     };
   },
 
+
+
+  //Es para actualizar modificando los campos necesarios
   async updateProduct(
     productId: string,
     productData: AdminProductPayload
@@ -212,6 +224,8 @@ export const adminService = {
     };
   },
 
+
+  //Como su nombre lo indica, elmina productos de la base de datos
   async deleteProduct(productId: string): Promise<void> {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
@@ -268,6 +282,8 @@ export const adminService = {
     });
   },
 
+
+  //cambia rol del usuario
   async updateUserRole(
     uid: string,
     role: UserRole,

@@ -7,15 +7,15 @@ import "./LandingPage.css";
 
 function LandingPage() {
   const { user, loading } = useAuth();
-
+//Si la aplicación está cargando, muestra una pantalla de carga. Si el usuario ya ha iniciado sesión, redirige a la página de inicio. De lo contrario, muestra la página de aterrizaje con información sobre la aplicación y opciones para iniciar sesión o registrarse.
   if (loading) {
     return <LoadingScreen />;
   }
-
+// Si el usuario ya ha iniciado sesión, redirige a la página de inicio. De lo contrario, muestra la página de aterrizaje con información sobre la aplicación y opciones para iniciar sesión o registrarse.
   if (user) {
     return <Navigate to="/home" replace />;
   }
-
+// Devuelve la representación visual de la página de aterrizaje, mostrando información sobre la aplicación y opciones para iniciar sesión o registrarse. Incluye un panel de guía con pasos para acceder a la aplicación.
   return (
     <main className="app-shell app-shell-hero">
       <section className="auth-layout hero">

@@ -4,7 +4,7 @@ import { useCart } from "../../cart/context/CartContext";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { createOrder } from "../../orders/services/orderService";
 import "./HomePage.css";
-
+// Formatea los precios en pesos colombianos sin decimales.
 const currencyFormatter = new Intl.NumberFormat("es-CO", {
   currency: "COP",
   maximumFractionDigits: 0,
@@ -13,7 +13,7 @@ const currencyFormatter = new Intl.NumberFormat("es-CO", {
 
 const getDiscountedItemPrice = (item: { price: number; discountPercent?: number }) =>
   item.discountPercent ? Math.round(item.price * (1 - item.discountPercent / 100)) : item.price;
-
+//Sirve para calcular el precio con descuento de un artículo, si tiene un porcentaje de descuento, redondeando el resultado al entero más cercano. Si no tiene descuento, devuelve el precio original.
 export default function CartPage() {
   const navigate = useNavigate();
   const { items, removeItem, updateQuantity, clear } = useCart();
@@ -37,12 +37,12 @@ export default function CartPage() {
       navigate("/login");
       return;
     }
-
+//Si el usuario no ha iniciado sesión, muestra una alerta indicando que debe iniciar sesión para finalizar la compra y redirige a la página de inicio de sesión.
     if (items.length === 0) {
       alert("Tu carrito está vacío. Agrega productos antes de finalizar tu compra.");
       return;
     }
-
+//Si el carrito está vacío, muestra una alerta indicando que debe agregar productos antes de finalizar la compra y no procede con el checkout.  
     setLoading(true);
     try {
       const orderPayload = {
@@ -53,7 +53,7 @@ export default function CartPage() {
         shipping: "Gratis",
         status: "processing" as const,
       };
-
+//Crea un objeto orderPayload con la información de la orden, incluyendo el id del usuario, los artículos del carrito, el total después del descuento, el monto del descuento, el envío y el estado de la orden.
       console.log("📦 Creando orden:", orderPayload);
       const orderId = await createOrder(orderPayload);
       console.log("✅ Orden creada con ID:", orderId);
@@ -86,7 +86,7 @@ export default function CartPage() {
       setLoading(false);
     }
   };
-
+//Devuelve la representación visual de la página del carrito, mostrando los productos agregados, sus cantidades, precios y un resumen del pedido. Permite al usuario ajustar cantidades, eliminar productos, vaciar el carrito y finalizar la compra. Si el carrito está vacío, muestra un mensaje indicando que no hay productos en el carrito.
   return (
     <section className="cart-page container">
       <div className="cart-page-header">
